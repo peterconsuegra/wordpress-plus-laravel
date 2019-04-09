@@ -5,9 +5,10 @@ namespace App\Http\Middleware;
 use Closure;
 use Log;
 use App\User;
-use Auth;
 
-class wplogic
+use Illuminate\Support\Facades\Auth;
+
+class WPAuthMiddleware
 {
     /**
      * Handle an incoming request.
@@ -24,7 +25,14 @@ class wplogic
         $wp_user = wp_get_current_user();
 			
         if ($wp_user->ID > 0) {
-			Auth::loginUsingId($wp_user->ID);
+			
+			$current_user = Auth::loginUsingId($wp_user->ID,true);
+			$user = User::find($wp_user->ID);
+		
+			#Log::info("usuario logeado: ".$wp_user->user_login);
+			#Log::info("usuario logeado desde laravel: ".$current_user->user_login);
+			#Log::info("usuario elocuent: ".$user->user_login);
+			
         } else {
             Auth::logout();
             return redirect(env('WP_URL').'/login');
