@@ -1,6 +1,6 @@
 {
-  "name": "novius/laravel-artisan-commands",
-  "description": "Additional artisan commands for Laravel",
+  "name": "peterconsuegra/wordpress-plus-laravel",
+  "description": "Get the best of both worlds by integrating WordPress with Laravel – a powerful MVC framework for PHP.",
   "keywords": [
     "Artisan",
     "Console",
@@ -11,9 +11,9 @@
   "license": "AGPL-3.0",
   "authors": [
     {
-      "name": "Novius Agency",
-      "email": "team-developpeurs@novius.com",
-      "homepage": "http://novius.com"
+      "name": "Pedro Consuegra",
+      "email": "pedroconsuegrat@gmail.com",
+      "homepage": "http://pedroconsuegra.com"
     }
   ],
   "require": {
@@ -27,12 +27,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Novius\\ArtisanCommands\\": "src"
+      "Peterconsuegra\\WordPressPlusLaravel\\": "src"
     }
   },
   "autoload-dev": {
      "psr-4": {
-      "Novius\\ArtisanCommands\\Tests\\": "tests"
+      "Peterconsuegra\\WordPressPlusLaravel\\Tests\\": "tests"
     }
   },
   "scripts": {
@@ -46,7 +46,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Novius\\ArtisanCommands\\ArtisanCommandsServiceProvider"
+        "Peterconsuegra\\WordPressPlusLaravel\\WordPressPlusLaravelServiceProvider"
       ]
     }
   },

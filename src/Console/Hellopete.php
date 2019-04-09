@@ -1,6 +1,6 @@
 <?php
 
-namespace Novius\ArtisanCommands\Console\Database;
+namespace Peterconsuegra\WordPressPlusLaravel\Console;
 
 use Illuminate\Console\Command;
 

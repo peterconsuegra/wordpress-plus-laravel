@@ -1,10 +1,10 @@
 <?php
 
-namespace Novius\ArtisanCommands;
+namespace Peterconsuegra\WordPressPlusLaravel;
 
 use Illuminate\Support\ServiceProvider;
 
-class ArtisanCommandsServiceProvider extends ServiceProvider
+class WordPressPlusLaravelServiceProvider extends ServiceProvider
 {
     /**
      * Boot the service provider.
@@ -17,9 +17,7 @@ class ArtisanCommandsServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\Database\Configure::class,
-                Console\Database\Create::class,
-				Console\Database\Hellopete::class,
+				Console\Hellopete::class,
             ]);
         }
     }
