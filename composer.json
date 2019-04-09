@@ -1,6 +1,6 @@
 {
-    "name": "peteconsuegra/testpackage",
-    "description": "Testing my first package",
+    "name": "peteconsuegra/wordpress-plus-laravel",
+    "description": "Get the best of both worlds by integrating WordPress with Laravel – a powerful MVC framework for PHP.",
     "type": "library",
     "license": "mit",
     "authors": [
