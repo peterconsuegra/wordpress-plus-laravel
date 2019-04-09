@@ -24,7 +24,16 @@ class Hellopete extends Command {
 
     
     public function handle() {
-        $this->comment("Hola Pete desde package");
+		
+		$template_path = base_path()."/vendor"."/peteconsuegra"."/wordpress-plus-laravel"."/templates"."/wplogic.php";
+		$file_path = base_path()."/app"."/Http"."/Middleware"."/wplogic.php";
+		
+		if (!copy($template_path, $file_path)) {
+		    echo "failed to copy $template_path...\n";
+			
+		}
+		
+        
     }
 
 }
