@@ -1,0 +1,14 @@
+{
+    "name": "peteconsuegra/testpackage",
+    "description": "Testing my first package",
+    "type": "library",
+    "license": "mit",
+    "authors": [
+        {
+            "name": "Pedro Consuegra",
+            "email": "pedroconsuegrat@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
