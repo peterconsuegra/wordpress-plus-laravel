@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddRememberToken extends Migration
+class ChangeToNullUserRegistered extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class AddRememberToken extends Migration
     {
         Schema::table('wp_users', function (Blueprint $table) {
             //
-			 $table->string('remember_token')->nullable();	
+			 $table->string('user_registered')->nullable()->change();
         });
     }
 
@@ -26,8 +26,6 @@ class AddRememberToken extends Migration
      */
     public function down()
     {
-        Schema::table('wp_users', function (Blueprint $table) {
-            //
-        });
+		
     }
 }
