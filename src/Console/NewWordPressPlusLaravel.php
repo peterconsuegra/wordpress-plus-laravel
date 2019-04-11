@@ -73,6 +73,10 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_end_of_file($file_path,"Route::get('/', 'HelloController@wordpress_code_example');");
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
 			
+		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
+		WpTools::renameHelperFunctions();
+		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
+		
     }
 
 }
