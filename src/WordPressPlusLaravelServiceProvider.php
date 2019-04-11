@@ -17,7 +17,7 @@ class WordPressPlusLaravelServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-				Console\InstallWPMiddleware::class,
+				Console\NewWordPressPlusLaravel::class,
             ]);
         }
     }

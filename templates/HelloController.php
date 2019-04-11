@@ -22,15 +22,9 @@ class HelloController extends Controller
 			
 	}
 	
-    public function world()
-    {
-       
-	   return view('hello.world');
-    }
-	
 	public function wordpress_code_example(){
 		
-		return view('hello.wordpress_code_example');
+		return view('wordpress_code_example');
 	}
 
    

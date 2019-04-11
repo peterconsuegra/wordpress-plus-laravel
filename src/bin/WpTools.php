@@ -46,7 +46,8 @@ class WpTools{
 		 }else{
 		   Log::info("success conection");
 		 }
-			
+		
+		Log::info("ALTER TABLE `$table` CHANGE `$column_name` `$column_name` DATETIME NULL DEFAULT NULL");
 		$conn->query("ALTER TABLE `$table` CHANGE `$column_name` `$column_name` DATETIME NULL DEFAULT NULL");
 		$conn->close();
 	}
@@ -70,8 +71,21 @@ class WpTools{
 
 	}
 	
-	public static function hello_world(){
-		Log::info("hello world 777");
+	public static function add_code_to_end_of_file($file,$var,$first=true){
+		
+		foreach(file($file) as $line)
+		{
+			
+			if($var == trim($line)){
+				$first = false;
+			}
+			
+		}
+		
+		if($first==true){
+			file_put_contents($file, "\n".$var, FILE_APPEND);
+		}
+		 
 	}
 	
 }
