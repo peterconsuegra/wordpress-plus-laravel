@@ -33,7 +33,7 @@ class NewWordPressPlusLaravel extends Command {
 		$float_version = (float)$num;
 		$this->comment($float_version);
 		
-		if($float_version >=5.6){
+		//if($float_version >=5.6){
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/WPAuthMiddleware.php";
@@ -79,7 +79,7 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::renameHelperFunctions();
 		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
 		
-		if($float_version == 5.6){
+		if($float_version <= 5.6){
 			
 			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
 			WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \Illuminate\Auth\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
@@ -93,7 +93,7 @@ class NewWordPressPlusLaravel extends Command {
 			
 		}
 		
-		}
+		//}
 		
     }
 
