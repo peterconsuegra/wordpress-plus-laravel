@@ -28,6 +28,13 @@ class NewWordPressPlusLaravel extends Command {
     
     public function handle() {
 		
+		$version = app()->version();
+		$num = substr($version, 0, 3);
+		$float_version = (float)$num;
+		$this->comment($float_version);
+		
+		if($float_version >=5.6){
+			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
@@ -50,12 +57,7 @@ class NewWordPressPlusLaravel extends Command {
 		
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
 		WpTools::set_column_to_null_by_default("wp_users","user_registered");
-		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");
-		
-		//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
-		WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \App\Http\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
-		$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
-		
+		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
 		//Add HelloController
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/HelloController.php";
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	
@@ -76,6 +78,22 @@ class NewWordPressPlusLaravel extends Command {
 		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
 		WpTools::renameHelperFunctions();
 		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
+		
+		if($float_version == 5.6){
+			
+			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
+			WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \Illuminate\Auth\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
+			$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
+			
+		}else{
+			
+			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
+			WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \App\Http\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
+			$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
+			
+		}
+		
+		}
 		
     }
 
