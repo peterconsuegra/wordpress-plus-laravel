@@ -35,7 +35,7 @@ class WPAuthMiddleware
 			
         } else {
             Auth::logout();
-            return redirect(env('WP_URL').'/wp-login');
+            return redirect(env('WP_URL').'/wp-login.php');
         }
 		
         return $next($request);
