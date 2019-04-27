@@ -31,7 +31,7 @@ class NewWordPressPlusLaravel extends Command {
 		$version = app()->version();
 		$num = substr($version, 0, 3);
 		$float_version = (float)$num;
-		$this->comment($float_version);
+		$this->comment("Laravel version: ".$float_version);
 		
 		//if($float_version >=5.6){
 			
