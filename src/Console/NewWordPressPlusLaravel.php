@@ -58,6 +58,7 @@ class NewWordPressPlusLaravel extends Command {
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
 		WpTools::set_column_to_null_by_default("wp_users","user_registered");
 		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
+		
 		//Add HelloController
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/HelloController.php";
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	

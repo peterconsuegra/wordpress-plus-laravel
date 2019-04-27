@@ -66,7 +66,8 @@ class WpTools{
 		   Log::info("success conection");
 		 }
 		
- 		$conn->query("ALTER TABLE `$table` ADD `$column_name` $data_type NULL AFTER `$column_after`;");
+		Log::info("ALTER TABLE `$table` ADD `$column_name` $data_type NULL");
+ 		$conn->query("ALTER TABLE `$table` ADD `$column_name` $data_type NULL");
  		$conn->close();
 
 	}
