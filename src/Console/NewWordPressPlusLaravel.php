@@ -51,13 +51,13 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_file(base_path()."/app/User.php",'/**',$code);
 		$this->comment("Add code $code to app/User.php");
 		
-		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
-		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name");
-		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
-		
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
 		WpTools::set_column_to_null_by_default("wp_users","user_registered");
 		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
+		
+		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
+		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name");
+		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
 		
 		//Add HelloController
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/HelloController.php";
