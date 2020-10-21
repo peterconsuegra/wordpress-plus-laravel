@@ -51,8 +51,7 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
 		//Add user model to WPAuthMiddleware
-		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$code);
-		$this->comment("Add code $code to app/User.php");
+		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 			
 		//Add code protected $primaryKey = 'ID'; to app/User.php
 		$code = "protected " .'$primaryKey'." = 'ID';";
