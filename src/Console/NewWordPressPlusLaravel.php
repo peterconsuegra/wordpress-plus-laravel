@@ -38,11 +38,11 @@ class NewWordPressPlusLaravel extends Command {
 		if($float_version < 8){
 			$user_model_path = "/app/User.php";
 			$user_reference = "use App\User;";
-			$controller_reference = "Route::get('/', 'HelloController@wordpress_code_example')";
+			$controller_reference = "Route::get('/', 'HelloController@wordpress_code_example');";
 		}else{
 			$user_model_path = "/app/Models/User.php";
 			$user_reference = "use App\Models\User;";
-			$controller_reference = "Route::get('/', [HelloController::class, 'wordpress_code_example'])";
+			$controller_reference = "Route::get('/', [HelloController::class, 'wordpress_code_example']);";
 		}
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
@@ -87,6 +87,11 @@ class NewWordPressPlusLaravel extends Command {
 		$file_path = base_path()."/routes/web.php";
 		WpTools::add_code_to_end_of_file($file_path,$controller_reference);
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
+		
+		if($float_version >= 8){
+			$code = "use App\Http\Controllers\HelloController;";
+			WpTools::add_code_to_file($file_path,'/*',$code);
+		}
 			
 		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
 		WpTools::renameHelperFunctions();
