@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Log;
-use App\User;
 
+
+/*user model
+*/
 use Illuminate\Support\Facades\Auth;
 
 class WPAuthMiddleware

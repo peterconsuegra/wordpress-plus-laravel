@@ -34,21 +34,34 @@ class NewWordPressPlusLaravel extends Command {
 		$this->comment("Laravel version: ".$float_version);
 		
 		//if($float_version >=5.6){
+		
+		if($float_version < 8){
+			$user_model_path = "/app/User.php";
+			$user_reference = "use App\User;";
+			$controller_reference = "Route::get('/', 'HelloController@wordpress_code_example')";
+		}else{
+			$user_model_path = "/app/Models/User.php";
+			$user_reference = "use App\Models\User;";
+			$controller_reference = "Route::get('/', [HelloController::class, 'wordpress_code_example'])";
+		}
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
+		//Add user model to WPAuthMiddleware
+		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$code);
+		$this->comment("Add code $code to app/User.php");
 			
 		//Add code protected $primaryKey = 'ID'; to app/User.php
 		$code = "protected " .'$primaryKey'." = 'ID';";
-		WpTools::add_code_to_file(base_path()."/app/User.php",'/**',$code);
+		WpTools::add_code_to_file(base_path().$user_model_path,'/**',$code);
 		$this->comment("Add code $code to app/User.php");
 		
-		//Add code protected $table = 'wp_users'; to app/User.php
+		//Add code protected $table = 'wp_users'; to app/User.php	
 		$code = "protected ".'$table'." = 'wp_users';";
-		WpTools::add_code_to_file(base_path()."/app/User.php",'/**',$code);
+		WpTools::add_code_to_file(base_path().$user_model_path,'/**',$code);
 		$this->comment("Add code $code to app/User.php");
 		
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
@@ -73,7 +86,7 @@ class NewWordPressPlusLaravel extends Command {
 		
 		//Add route to wordpress_code_example
 		$file_path = base_path()."/routes/web.php";
-		WpTools::add_code_to_end_of_file($file_path,"Route::get('/', 'HelloController@wordpress_code_example');");
+		WpTools::add_code_to_end_of_file($file_path,$controller_reference);
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
 			
 		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
