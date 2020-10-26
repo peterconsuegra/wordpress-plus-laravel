@@ -105,27 +105,27 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file edit_post.blade.php ");
 		
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/edit_posts.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_posts.blade.php";
 		$file_path = base_path()."/resources/views/edit_posts.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file edit_posts.blade.php");
 		
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/list_orders.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_orders.blade.php";
 		$file_path = base_path()."/resources/views/list_orders.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file list_orders.blade.php");
 		
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/list_posts.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_posts.blade.php";
 		$file_path = base_path()."/resources/views/list_posts.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file list_posts.blade.php");
 		
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/list_products.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_products.blade.php";
 		$file_path = base_path()."/resources/views/list_products.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file list_products.blade.php");
 		
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/list_users.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_users.blade.php";
 		$file_path = base_path()."/resources/views/list_users.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file list_users.blade.php");
