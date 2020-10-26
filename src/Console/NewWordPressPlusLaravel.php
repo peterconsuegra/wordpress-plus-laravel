@@ -39,7 +39,7 @@ class NewWordPressPlusLaravel extends Command {
 			$user_model_path = "/app/User.php";
 			$user_reference = "use App\User;";
 			$controller_reference = "";
-			$controller_reference .= "Route::get('list_users","HelloController@list_users');\n";
+			$controller_reference .= "Route::get('list_users','HelloController@list_users');\n";
 			$controller_reference .= "Route::get('list_orders', 'HelloController@list_orders');\n";
 			$controller_reference .= "Route::get('list_posts', 'HelloController@list_posts');\n";
 			$controller_reference .= "Route::get('list_products', 'HelloController@list_products');\n";
