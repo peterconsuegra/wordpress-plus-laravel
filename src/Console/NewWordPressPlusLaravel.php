@@ -36,6 +36,8 @@ class NewWordPressPlusLaravel extends Command {
 		//if($float_version >=5.6){
 		
 		if($float_version < 8){
+			$user_model_path = "/app/User.php";
+			$user_reference = "use App\User;";
 			$controller_reference = "";
 			$controller_reference .= "Route::get('list_users','HelloController@list_users');\n";
 			$controller_reference .= "Route::get('list_orders', 'HelloController@list_orders');\n";
@@ -47,7 +49,8 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
 			
 		}else{
-			
+			$user_model_path = "/app/Models/User.php";
+			$user_reference = "use App\Models\User;";
 			$controller_reference = "";
 			$controller_reference .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
 			$controller_reference .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
@@ -57,15 +60,6 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
 			$controller_reference .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
 			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
-		}
-		
-		$base_path = base_path();
-		if(file_exists($base_path."/app/Models/User.php")){
-			$user_model_path = "/app/Models/User.php";
-			$user_reference = "use App\Models\User;";
-		}else if($base_path."/app/User.php"){
-			$user_model_path = "/app/User.php";
-			$user_reference = "use App\User;";
 		}
 		
 		if($float_version >= 6){
