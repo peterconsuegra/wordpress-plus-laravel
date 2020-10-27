@@ -42,6 +42,6 @@
 		<br />
 		<br />
 		<br />
-		<a href="/">List examples</a>
+		<a href="/wordpress_plus_laravel_examples">List examples</a>
     </body>
 </html>
