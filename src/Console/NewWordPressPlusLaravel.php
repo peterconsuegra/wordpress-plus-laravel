@@ -64,7 +64,7 @@ class NewWordPressPlusLaravel extends Command {
 		}
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/WPAuthMiddleware.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/middleware/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
@@ -95,7 +95,7 @@ class NewWordPressPlusLaravel extends Command {
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
 		
         //Adding template views
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/wordpress_code_example.blade.php";
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_code_example.blade.php";
 		$file_path = base_path()."/resources/views/wordpress_code_example.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file wordpress_code_example.php ");

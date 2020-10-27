@@ -66,7 +66,7 @@ class HelloController extends Controller
 	}
 	
 	public function edit_post(Request $request){
-		$post_id = $request->input('post_id'); 
+		$post_id = $request->get('post_id'); 
 		$post = get_post( $post_id );
 		return view('edit_post',compact('post'));
 	}
