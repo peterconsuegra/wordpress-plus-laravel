@@ -47,7 +47,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_post', 'HelloController@edit_post');\n";
 			$controller_reference .= "Route::post('update_post', 'HelloController@update_post');\n";
 			$controller_reference .= "Route::get('/', 'HelloController@wordpress_code_example');\n";
-			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
+			
 		}else{
 			$user_model_path = "/app/Models/User.php";
 			$user_reference = "use App\Models\User;";
@@ -60,7 +60,12 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);";
 			$controller_reference .= "Route::get('update_post', [HelloController::class, 'update_post']);";
 			$controller_reference .= "Route::get('/', [HelloController::class, 'wordpress_code_example']);";
+		}
+		
+		if($float_version >= 6){
 			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
+		}else{
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
 		}
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
