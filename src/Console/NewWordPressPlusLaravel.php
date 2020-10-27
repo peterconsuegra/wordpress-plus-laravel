@@ -47,6 +47,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_post', 'HelloController@edit_post');\n";
 			$controller_reference .= "Route::post('update_post', 'HelloController@update_post');\n";
 			$controller_reference .= "Route::get('/', 'HelloController@wordpress_code_example');\n";
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
 		}else{
 			$user_model_path = "/app/Models/User.php";
 			$user_reference = "use App\Models\User;";
@@ -59,6 +60,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);";
 			$controller_reference .= "Route::get('update_post', [HelloController::class, 'update_post']);";
 			$controller_reference .= "Route::get('/', [HelloController::class, 'wordpress_code_example']);";
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
 		}
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
@@ -88,11 +90,9 @@ class NewWordPressPlusLaravel extends Command {
 		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
 		
 		//Add HelloController
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/HelloController.php";
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	
-		WpTools::insert_template($template_path,$file_path);
+		WpTools::insert_template($controller_template_path,$file_path);
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
-		
 		
         //Adding template views
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/wordpress_code_example.blade.php";
