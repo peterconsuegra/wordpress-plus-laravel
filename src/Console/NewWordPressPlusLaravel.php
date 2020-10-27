@@ -52,14 +52,14 @@ class NewWordPressPlusLaravel extends Command {
 			$user_model_path = "/app/Models/User.php";
 			$user_reference = "use App\Models\User;";
 			$controller_reference = "";
-			$controller_reference .= "Route::get('list_users', [HelloController::class,'list_users']);";
-			$controller_reference .= "Route::get('list_orders', [HelloController::class,'list_orders']);";
-			$controller_reference .= "Route::get('list_posts', [HelloController::class,'list_posts']);";
-			$controller_reference .= "Route::get('list_products', [HelloController::class,'list_products']);";
-			$controller_reference .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);";
-			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);";
-			$controller_reference .= "Route::get('update_post', [HelloController::class, 'update_post']);";
-			$controller_reference .= "Route::get('/', [HelloController::class, 'wordpress_code_example']);";
+			$controller_reference .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
+			$controller_reference .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
+			$controller_reference .= "Route::get('list_posts', [HelloController::class,'list_posts']);\n";
+			$controller_reference .= "Route::get('list_products', [HelloController::class,'list_products']);\n";
+			$controller_reference .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);\n";
+			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
+			$controller_reference .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
+			$controller_reference .= "Route::get('/', [HelloController::class, 'wordpress_code_example']);\n";
 		}
 		
 		if($float_version >= 6){
