@@ -23,9 +23,9 @@ class HelloController extends Controller
 	     $this->middleware('auth.wp');
 	}
 		
-	public function wordpress_code_example(){
+	public function wordpress_plus_laravel_examples(){
 		
-		return view('wordpress_code_example');
+		return view('wordpress_plus_laravel_examples');
 	}
 	
 	public function list_users(){

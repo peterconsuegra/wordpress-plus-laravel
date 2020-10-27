@@ -46,7 +46,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_posts', 'HelloController@edit_posts');\n";
 			$controller_reference .= "Route::get('edit_post', 'HelloController@edit_post');\n";
 			$controller_reference .= "Route::post('update_post', 'HelloController@update_post');\n";
-			$controller_reference .= "Route::get('/wordpress_examples', 'HelloController@wordpress_code_example');\n";
+			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
 			
 		}else{
 			$user_model_path = "/app/Models/User.php";
@@ -59,7 +59,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);\n";
 			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
 			$controller_reference .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
-			$controller_reference .= "Route::get('/wordpress_examples', [HelloController::class, 'wordpress_code_example']);\n";
+			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
 		}
 		
 		if($float_version >= 6){
@@ -100,8 +100,8 @@ class NewWordPressPlusLaravel extends Command {
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
 		
         //Adding template views
-		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_code_example.blade.php";
-		$file_path = base_path()."/resources/views/wordpress_code_example.blade.php";	
+		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples.blade.php";
+		$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file wordpress_code_example.php ");
 		
