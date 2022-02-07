@@ -32,12 +32,16 @@ class NewWordPressPlusLaravel extends Command {
 		$num = substr($version, 0, 3);
 		$float_version = (float)$num;
 		$this->comment("Laravel version: ".$float_version);
+		$file_path = WpTools::search_user_model(base_path());
+		$file_path = WpTools::$user_model;
 		
-		//if($float_version >=5.6){
+		$code = WpTools::get_user_namespace($file_path,"namespace");
+		
+		$this->comment("namespace: ".$code);
+		
 		
 		if($float_version < 8){
-			$user_model_path = "/app/User.php";
-			$user_reference = "use App\User;";
+			
 			$controller_reference = "";
 			$controller_reference .= "Route::get('list_users','HelloController@list_users');\n";
 			$controller_reference .= "Route::get('list_orders', 'HelloController@list_orders');\n";
@@ -49,8 +53,7 @@ class NewWordPressPlusLaravel extends Command {
 			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
 			
 		}else{
-			$user_model_path = "/app/Models/User.php";
-			$user_reference = "use App\Models\User;";
+			
 			$controller_reference = "";
 			$controller_reference .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
 			$controller_reference .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
@@ -67,6 +70,10 @@ class NewWordPressPlusLaravel extends Command {
 		}else{
 			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
 		}
+		
+		$user_model_path = WpTools::search_user_model(base_path());
+		$user_model_path = WpTools::$user_model;
+		$user_reference = WpTools::get_user_namespace($user_model_path,"namespace");
 			
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/middleware/WPAuthMiddleware.php";
@@ -75,16 +82,20 @@ class NewWordPressPlusLaravel extends Command {
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
 		//Add user model to WPAuthMiddleware
 		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
-			
-		//Add code protected $primaryKey = 'ID'; to app/User.php
+		
+		//USER MODEL	
+		WpTools::delete_code_in_file($file_path,"'users'");
+		WpTools::delete_code_in_file($file_path,'$primaryKey');
+		
+		//Add primaryKey
 		$code = "protected " .'$primaryKey'." = 'ID';";
-		WpTools::add_code_to_file(base_path().$user_model_path,'/**',$code);
-		$this->comment("Add code $code to app/User.php");
+		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
+		$this->comment("Add code $code to $file_path");
 		
 		//Add code protected $table = 'wp_users'; to app/User.php	
 		$code = "protected ".'$table'." = 'wp_users';";
-		WpTools::add_code_to_file(base_path().$user_model_path,'/**',$code);
-		$this->comment("Add code $code to app/User.php");
+		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
+		$this->comment("Add code $code to $file_path");
 		
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
 		WpTools::set_column_to_null_by_default("wp_users","user_registered");
@@ -162,8 +173,7 @@ class NewWordPressPlusLaravel extends Command {
 			$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
 			
 		}
-		
-		//}
+
 		
     }
 
