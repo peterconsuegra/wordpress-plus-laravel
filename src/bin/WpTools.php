@@ -1,16 +1,186 @@
 <?php
 
+#use Peterconsuegra\WordPressPlusLaravel\bin\WpTools
 namespace Peterconsuegra\WordPressPlusLaravel\bin;
 
 use Log;
 
 class WpTools{
 	
+	public static $file_path;
+	
+	public static function replace_migration_if_table_exists($table,$migration_file){
+		$dir = base_path()."/database/migrations";
+		if(\Schema::hasTable($table)){
+			WpTools::search_file_with_pattern($dir,$migration_file);
+			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/migrations/$migration_file";
+			WpTools::insert_template($template_path,WpTools::$file_path);
+		}
+	}
+	
+	public static function search_file_with_pattern($dir,$file_to_search){
+		
+		$files = scandir($dir);
+		
+		foreach($files as $key => $value){
+    	
+		    $path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+    	
+		    if(!is_dir($path)) {
+    			Log::info("$path");
+				if(strpos($path, $file_to_search) !== false){
+					WpTools::$file_path = $path;
+		        }
+    	
+		    } else if($value != "." && $value != "..") {
+    	
+		       WpTools::search_file_with_pattern($path,$file_to_search);
+    	
+		    }  
+		} 
+	}
+	
+	public static function search_file($dir,$file_to_search,$content){
+		
+		$files = scandir($dir);
+		
+		foreach($files as $key => $value){
+    	
+		    $path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+    	
+		    if(!is_dir($path)) {
+    	
+		        if($file_to_search == $value){
+					$file_content = @file_get_contents($path);
+					if(strpos($file_content, $content) !== false){
+						WpTools::$file_path = $path;
+					} 
+		          
+		        }
+    	
+		    } else if($value != "." && $value != "..") {
+    	
+		       WpTools::search_file($path,$file_to_search,$content);
+    	
+		    }  
+		} 
+		
+	}
+	
+	public static function get_laravel_routes_code($laravel_version){
+		$routes_code = "";
+		if($laravel_version < 8){
+			$routes_code .= "Route::get('list_users','HelloController@list_users');\n";
+			$routes_code .= "Route::get('list_orders', 'HelloController@list_orders');\n";
+			$routes_code .= "Route::get('list_posts', 'HelloController@list_posts');\n";
+			$routes_code .= "Route::get('list_products', 'HelloController@list_products');\n";
+			$routes_code .= "Route::get('edit_posts', 'HelloController@edit_posts');\n";
+			$routes_code .= "Route::get('edit_post', 'HelloController@edit_post');\n";
+			$routes_code .= "Route::post('update_post', 'HelloController@update_post');\n";
+			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
+			
+		}else{
+			$routes_code .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
+			$routes_code .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
+			$routes_code .= "Route::get('list_posts', [HelloController::class,'list_posts']);\n";
+			$routes_code .= "Route::get('list_products', [HelloController::class,'list_products']);\n";
+			$routes_code .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);\n";
+			$routes_code .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
+			$routes_code .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
+			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
+		}
+		return $routes_code;
+	}
+	
+	public static function get_hello_controller($laravel_version){
+		if($laravel_version >= 6){
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
+		}else{
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
+		}
+		return $controller_template_path;
+	}
+	
 	public static function insert_template($template_path,$file_path){
 		
 		if (!copy($template_path, $file_path)) {
 		    echo "failed to copy $template_path...\n";
 		}
+	}
+	
+	public static function add_code_to_file_pro($file,$pointer,$var,$row_plus){
+		
+		$lines = array();
+		$sw = false;
+		$sw_row_plus=false;
+		$loop_cont=0;
+		$find_cont=0;
+		$find_flag=0;
+		$activator=0;
+		$first=true;
+		
+		foreach(file($file) as $line)
+		{
+			//Log::info($line);
+			$find_cont=$find_cont*$activator;
+			if($var == trim($line)){
+				$first = false;
+			}
+			
+			if($pointer == trim($line) && ($sw == false) && ($first == true))
+			{
+				$sw = true;
+				$find_flag=$loop_cont;
+				$activator=1;
+			}
+			
+			if($find_cont > $row_plus && ($sw_row_plus == false)){
+				array_push($lines, "$var  \n");
+				$sw_row_plus=true;
+			}
+			
+			array_push($lines, $line);
+			$loop_cont++;
+			$find_cont++;
+		}
+		
+		file_put_contents($file, $lines);
+	}
+	
+	public static function delete_code_in_file($file,$pointer){
+		$lines = array();
+		$sw = false;
+		$first=true;
+		foreach(file($file) as $line)
+		{
+			if(!strpos($line, $pointer) !== false){
+				array_push($lines, $line);
+			}
+			
+		}
+		file_put_contents($file, $lines);
+	}
+	
+	public static function get_code_in_file($file,$pointer){
+		$lines = array();
+		$sw = false;
+		$first=true;
+		foreach(file($file) as $line)
+		{
+			if(strpos($line, $pointer) !== false){
+				return $line;
+			}
+			
+		}
+	}
+	
+	public static function get_user_namespace($file,$pointer){
+		$namespace = WpTools::get_code_in_file($file,$pointer);
+		$namespace = str_replace("namespace ","",$namespace);
+		$namespace = str_replace(";","",$namespace);
+		$namespace = trim($namespace);
+		$namespace = "use ".$namespace."\User;";
+		return $namespace;
 	}
 	
 	public static function add_code_to_file($file,$pointer,$var,$first=true){

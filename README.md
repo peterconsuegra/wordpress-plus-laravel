@@ -1,21 +1,11 @@
-# WordPressPlusLaravel
+# WordPress Plus Laravel
 
+WordPress efficiency starts here.
+Integrate Laravel, migrate, launch, or clone WordPress sites in minutes.
 
-
-#Install
-pasos resumen
-
-copiar Middleware
-protected $table = 'wp_users';
-crear campo remember_token en wp_users
-cambiar user_registered a predetemrinado null en wp_users
-error de metodo repetido en WordPress __
-agregar 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, en kernel.php
-setear base de datos de laravel la misma de WordPress
-
-```
-
+This is a plugin for [WordPress Pete](https://wordpresspete.com)
 
 ## Licence
-
-This package is under MIT License
+All rigths reserved
+WordPress Pete 2022
+WordPress efficiency starts here
