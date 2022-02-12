@@ -1,17 +1,22 @@
 <?php
 
+#use Peterconsuegra\WordPressPlusLaravel\bin\WpTools
 namespace Peterconsuegra\WordPressPlusLaravel\bin;
 
 use Log;
 
 class WpTools{
 	
-	public static $user_model;
+	public static $file_path;
 	
-	public static function search_user_model($dir){
+	public static function delete_migration_if_table_exists($table){
+		if(Schema::hasTable($table)){
+			
+		}
+	}
+	
+	public static function search_file($dir,$file_to_search,$content){
 		
-		$content = "namespace App";
-		$file_to_search = "User.php";
 		$files = scandir($dir);
 		
 		foreach($files as $key => $value){
@@ -23,20 +28,52 @@ class WpTools{
 		        if($file_to_search == $value){
 					$file_content = @file_get_contents($path);
 					if(strpos($file_content, $content) !== false){
-			            //echo "file found<br>";
-			            //echo $path;
-						WpTools::$user_model = $path;
+						WpTools::$file_path = $path;
 					} 
 		          
 		        }
     	
 		    } else if($value != "." && $value != "..") {
     	
-		       WpTools::search_user_model($path);
+		       WpTools::search_file($path,$file_to_search,$content);
     	
 		    }  
 		} 
 		
+	}
+	
+	public static function get_laravel_routes_code($laravel_version){
+		$routes_code = "";
+		if($laravel_version < 8){
+			$routes_code .= "Route::get('list_users','HelloController@list_users');\n";
+			$routes_code .= "Route::get('list_orders', 'HelloController@list_orders');\n";
+			$routes_code .= "Route::get('list_posts', 'HelloController@list_posts');\n";
+			$routes_code .= "Route::get('list_products', 'HelloController@list_products');\n";
+			$routes_code .= "Route::get('edit_posts', 'HelloController@edit_posts');\n";
+			$routes_code .= "Route::get('edit_post', 'HelloController@edit_post');\n";
+			$routes_code .= "Route::post('update_post', 'HelloController@update_post');\n";
+			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
+			
+		}else{
+			$routes_code .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
+			$routes_code .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
+			$routes_code .= "Route::get('list_posts', [HelloController::class,'list_posts']);\n";
+			$routes_code .= "Route::get('list_products', [HelloController::class,'list_products']);\n";
+			$routes_code .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);\n";
+			$routes_code .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
+			$routes_code .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
+			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
+		}
+		return $routes_code;
+	}
+	
+	public static function get_hello_controller($laravel_version){
+		if($laravel_version >= 6){
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
+		}else{
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
+		}
+		return $controller_template_path;
 	}
 	
 	public static function insert_template($template_path,$file_path){

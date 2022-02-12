@@ -28,53 +28,17 @@ class NewWordPressPlusLaravel extends Command {
     
     public function handle() {
 		
+		//GET LARAVEL VERSION
 		$version = app()->version();
 		$num = substr($version, 0, 3);
 		$float_version = (float)$num;
 		$this->comment("Laravel version: ".$float_version);
-		$file_path = WpTools::search_user_model(base_path());
-		$file_path = WpTools::$user_model;
 		
-		$code = WpTools::get_user_namespace($file_path,"namespace");
-		
-		$this->comment("namespace: ".$code);
-		
-		
-		if($float_version < 8){
-			
-			$controller_reference = "";
-			$controller_reference .= "Route::get('list_users','HelloController@list_users');\n";
-			$controller_reference .= "Route::get('list_orders', 'HelloController@list_orders');\n";
-			$controller_reference .= "Route::get('list_posts', 'HelloController@list_posts');\n";
-			$controller_reference .= "Route::get('list_products', 'HelloController@list_products');\n";
-			$controller_reference .= "Route::get('edit_posts', 'HelloController@edit_posts');\n";
-			$controller_reference .= "Route::get('edit_post', 'HelloController@edit_post');\n";
-			$controller_reference .= "Route::post('update_post', 'HelloController@update_post');\n";
-			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
-			
-		}else{
-			
-			$controller_reference = "";
-			$controller_reference .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
-			$controller_reference .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
-			$controller_reference .= "Route::get('list_posts', [HelloController::class,'list_posts']);\n";
-			$controller_reference .= "Route::get('list_products', [HelloController::class,'list_products']);\n";
-			$controller_reference .= "Route::get('edit_posts', [HelloController::class, 'edit_posts']);\n";
-			$controller_reference .= "Route::get('edit_post', [HelloController::class, 'edit_post']);\n";
-			$controller_reference .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
-			$controller_reference .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
-		}
-		
-		if($float_version >= 6){
-			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
-		}else{
-			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
-		}
-		
-		$user_model_path = WpTools::search_user_model(base_path());
-		$user_model_path = WpTools::$user_model;
+		$user_model_path = WpTools::search_file(base_path(),"User.php","namespace App");
+		$user_model_path = WpTools::$file_path;
 		$user_reference = WpTools::get_user_namespace($user_model_path,"namespace");
-			
+		
+		//SET WPAuthMiddleware.php
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/middleware/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
@@ -83,34 +47,33 @@ class NewWordPressPlusLaravel extends Command {
 		//Add user model to WPAuthMiddleware
 		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 		
-		//USER MODEL	
+		//SET USER MODEL	
 		WpTools::delete_code_in_file($file_path,"'users'");
 		WpTools::delete_code_in_file($file_path,'$primaryKey');
-		
 		//Add primaryKey
 		$code = "protected " .'$primaryKey'." = 'ID';";
 		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
 		$this->comment("Add code $code to $file_path");
-		
 		//Add code protected $table = 'wp_users'; to app/User.php	
 		$code = "protected ".'$table'." = 'wp_users';";
 		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
 		$this->comment("Add code $code to $file_path");
 		
+		//SQL HACKS
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
 		WpTools::set_column_to_null_by_default("wp_users","user_registered");
 		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
-		
 		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
 		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name");
 		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
 		
-		//Add HelloController
+		//ADD HELLO CONTROLLER FOR BUILT IN EXAMPLES
+		$controller_template_path = WpTools::get_hello_controller($float_version);
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	
 		WpTools::insert_template($controller_template_path,$file_path);
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
 		
-        //Adding template views
+        //ADD HELLO CONTROLLER VIEWS
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples.blade.php";
 		$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
 		WpTools::insert_template($template_path,$file_path);
@@ -146,20 +109,23 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add file list_users.blade.php");
 		
-		//Add route to wordpress_code_example
+		//ADD HELLO CONTROLLER ROUTES
 		$file_path = base_path()."/routes/web.php";
-		WpTools::add_code_to_end_of_file($file_path,$controller_reference);
+		$routes_code = WpTools::get_laravel_routes_code($float_version);
+		WpTools::add_code_to_end_of_file($file_path,$routes_code);
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
 		
 		if($float_version >= 8){
 			$code = "use App\Http\Controllers\HelloController;";
 			WpTools::add_code_to_file($file_path,'/*',$code);
 		}
-			
+		
+		//FIX renameHelperFunctions
 		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
 		WpTools::renameHelperFunctions();
 		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
 		
+		//ADD REFERENCE TO WPAuthMiddleware::class
 		if($float_version <= 5.6){
 			
 			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
