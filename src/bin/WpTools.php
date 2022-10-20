@@ -9,6 +9,7 @@ class WpTools{
 	
 	public static $file_path;
 	
+	
 	public static function replace_migration_if_table_exists($table,$migration_file){
 		$dir = base_path()."/database/migrations";
 		if(\Schema::hasTable($table)){
@@ -40,6 +41,7 @@ class WpTools{
 		} 
 	}
 	
+
 	public static function search_file($dir,$file_to_search,$content){
 		
 		$files = scandir($dir);
