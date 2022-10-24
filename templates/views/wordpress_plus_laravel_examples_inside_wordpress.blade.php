@@ -17,11 +17,13 @@
 			<br />
 		  <h3>WordPress+Laravel code examples:</h3>
 		  <ul>
+
 	  		<li><a href="{{$app_route}}/list_users">List WordPress users</a></li>
 	  		<li><a href="{{$app_route}}/list_posts">List WordPress posts</a></li>
 	  		<li><a href="{{$app_route}}/list_products">List Woocommerce products</a></li>
 	  		<li><a href="{{$app_route}}/list_orders">List Woocommerce orders</a></li>
 	  		<li><a href="{{$app_route}}/edit_posts">Edit WordPress posts</a></li>
+
 	 	 </ul>
     </body>
 </html>
