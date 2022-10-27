@@ -77,7 +77,6 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::insert_template($controller_template_path,$file_path);
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
 		
-       
 		
 		//ADD HELLO CONTROLLER ROUTES
 		$file_path = base_path()."/routes/web.php";
@@ -127,6 +126,7 @@ class NewWordPressPlusLaravel extends Command {
 			WpTools::insert_template($template_path,$file_path);
 			$this->comment("Add file wordpress_code_example.php ");
 			
+
 	        //ADD HELLO CONTROLLER VIEWS
 			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_post_inside.blade.php";
 			$file_path = base_path()."/resources/views/edit_post.blade.php";	
@@ -158,6 +158,7 @@ class NewWordPressPlusLaravel extends Command {
 			WpTools::insert_template($template_path,$file_path);
 			$this->comment("Add file list_users.blade.php");
 			
+
 		}else{
 			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples.blade.php";
 			$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
