@@ -14,15 +14,45 @@
     <body>
 
 		<div class="container">
+			
+			
+			
 			<br />
-		  <h3>WordPress+Laravel code examples:</h3>
-		  <ul>
-			  
-		  <li><a href="/list_users">List WordPress users</a></li>
-		  <li><a href="/list_posts">List WordPress posts</a></li>
-		  <li><a href="/list_products">List Woocommerce products</a></li>
-		  <li><a href="/list_orders">List Woocommerce orders</a></li>
-		  <li><a href="/edit_posts">Edit WordPress posts</a></li>
-	 	 </ul>
+	
+		  <h3>List WordPress users</h3>            
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>ID</th>
+		        <th>Display name</th>
+		        <th>Email</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+				<?php foreach ( $blogusers as $user ) {
+					
+					?>
+					
+	  		      <tr>
+	  		        <td>{{$user->ID}}</td>
+	  		        <td>{{$user->display_name}}</td>
+	  		        <td>{{$user->user_email}}</td>
+	  		      </tr>
+				  
+				  </tr>
+				  
+				<?php 	
+				}
+				?>
+		      
+		    </tbody>
+		  </table>
+		  
+		<br />
+		<a href="{{$app_route}}/wordpress_plus_laravel_examples">List examples</a>
+		  
+		</div>
+		
+		
     </body>
 </html>

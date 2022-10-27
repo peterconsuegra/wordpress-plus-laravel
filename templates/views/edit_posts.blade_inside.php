@@ -12,17 +12,36 @@
 	</head>
 
     <body>
+		
+		
+		
 
 		<div class="container">
 			<br />
-		  <h3>WordPress+Laravel code examples:</h3>
-		  <ul>
-			  
-		  <li><a href="/list_users">List WordPress users</a></li>
-		  <li><a href="/list_posts">List WordPress posts</a></li>
-		  <li><a href="/list_products">List Woocommerce products</a></li>
-		  <li><a href="/list_orders">List Woocommerce orders</a></li>
-		  <li><a href="/edit_posts">Edit WordPress posts</a></li>
-	 	 </ul>
+			 <h3>List WordPress posts</h3> 
+			
+			<?php
+			    $args = array(
+			        'post_type' => 'post'
+			    );
+
+			    $post_query = new WP_Query($args);
+
+			    if($post_query->have_posts() ) {
+			        while($post_query->have_posts() ) {
+			            $post_query->the_post();
+			            ?>
+			            <h2><?php the_title(); ?></h2>
+						<p>{{the_excerpt()}}</p>
+						<a href="{{$app_route}}/edit_post?post_id={{the_id()}}">Edit</a>
+			            <?php
+			            }
+			        }
+			?>
+			
+		<br />
+		<br />
+		<br />
+		<a href="{{$app_route}}/wordpress_plus_laravel_examples">List examples</a>
     </body>
 </html>
