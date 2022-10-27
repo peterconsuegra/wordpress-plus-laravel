@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Log;
+use View;
 
 class HelloController extends Controller
 {
@@ -21,16 +22,19 @@ class HelloController extends Controller
 	public function __construct()
 	{
 	     $this->middleware('auth.wp');
+		 
+  		$public_path = base_path();
+  		$app_route = explode("/", $public_path);
+  		$app_route = $app_route[array_key_last($app_route)];
+  		$app_route = "/$app_route";
+		 
+ 		 View::share(compact('app_route'));
 	}
 		
 	public function wordpress_plus_laravel_examples(){
 		
-		$public_path = base_path();
-		$app_route = explode("/", $public_path);
-		$app_route = $app_route[array_key_last($app_route)];
-		$app_route = "/$app_route";
 		
-		return view('wordpress_plus_laravel_examples',compact('app_route'));
+		return view('wordpress_plus_laravel_examples');
 	}
 	
 	public function list_users(){
