@@ -52,7 +52,7 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 		
 		//SET USER MODEL	
-		if (!strpos($file_path, 'protected $table = "wp_users"";') !== false){
+		if (!strpos($user_model_path, 'protected $table = "wp_users"";') !== false){
 			WpTools::delete_code_in_file($file_path,"'users'");
 			WpTools::delete_code_in_file($file_path,'$primaryKey');
 			//Add primaryKey
