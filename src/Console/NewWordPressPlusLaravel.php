@@ -52,16 +52,18 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 		
 		//SET USER MODEL	
-		WpTools::delete_code_in_file($file_path,"'users'");
-		WpTools::delete_code_in_file($file_path,'$primaryKey');
-		//Add primaryKey
-		$code = "protected " .'$primaryKey'." = 'ID';";
-		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
-		$this->comment("Add code $code to $file_path");
-		//Add code protected $table = 'wp_users'; to app/User.php	
-		$code = "protected ".'$table'." = 'wp_users';";
-		WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
-		$this->comment("Add code $code to $file_path");
+		if (WpTools::get_code_in_file($user_model_path,"wp_users") == "not_found"){
+			WpTools::delete_code_in_file($file_path,"'users'");
+			WpTools::delete_code_in_file($file_path,'$primaryKey');
+			//Add primaryKey
+			$code = "protected " .'$primaryKey'." = 'ID';";
+			WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
+			$this->comment("Add code $code to $file_path");
+			//Add code protected $table = 'wp_users'; to app/User.php	
+			$code = "protected ".'$table'." = 'wp_users';";
+			WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
+			$this->comment("Add code $code to $file_path");
+		}
 		
 		//SQL HACKS
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
