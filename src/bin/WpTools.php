@@ -278,4 +278,19 @@ class WpTools{
         file_put_contents($helpersPath, $content);
     }
 	
+    public static function rename_woo_wakeup()
+    {
+		$wordpress_path = env('WP_LOAD_PATH');
+        $file1 = $wordpress_path . '/wp-content/plugins/woocommerce/includes/rest-api/Utilities/SingletonTrait.php';
+		$file2 = $wordpress_path . '/wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php';
+
+        if ( ! file_exists($file2)) {
+            return;
+        }
+
+        $content = file_get_contents($file2);
+        $content = str_replace("private function __wakeup()", "public function __wakeup()", $content);
+        file_put_contents($file2, $content);
+    }
+	
 }
