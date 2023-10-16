@@ -232,28 +232,24 @@ class WpTools{
 		$db_user = env('DB_USERNAME');
 		$db_host = env('DB_HOST');
 		
-		try {
-		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);
 		// Check connection
 		if (mysqli_connect_errno()){
-		  Log::info("Failed to connect to MySQL: " . mysqli_connect_error());
-		 }else{
-		   Log::info("success conection");
-		 }
-				
+			Log::info("Failed to connect to MySQL: " . mysqli_connect_error());
+			}else{
+		   	Log::info("success conection");
+		}
 		
+		$check = $conn->query("SHOW COLUMNS FROM $table LIKE '$column_name'");
+		$num = mysqli_num_rows($check);
+		
+		if($num == 0){
 			Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
-	 		$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
-	 		$conn->close();
-		}
-
-		//catch exception
-		catch(Exception $e) {
-		  Log::info('Error: ' .$e->getMessage());
+		 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
 		}
 		
-
+	 	$conn->close();
+		
 	}
 	
 	public static function add_code_to_end_of_file($file,$var,$first=true){
