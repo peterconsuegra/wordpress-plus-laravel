@@ -96,6 +96,9 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::renameHelperFunctions();
 		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
 		
+		WpTools::rename_woo_wakeup();
+		$this->comment("Rename woo wakeup method private function __wakeup() to public function __wakeup() in /wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php");
+		
 		//ADD REFERENCE TO WPAuthMiddleware::class
 		if($float_version <= 5.6){
 			

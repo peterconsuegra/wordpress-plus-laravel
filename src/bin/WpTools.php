@@ -239,10 +239,18 @@ class WpTools{
 		 }else{
 		   Log::info("success conection");
 		 }
+				
+		try {
+			Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
+	 		$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+	 		$conn->close();
+		}
+
+		//catch exception
+		catch(Exception $e) {
+		  Log::info('Error: ' .$e->getMessage());
+		}
 		
-		Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
- 		$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
- 		$conn->close();
 
 	}
 	
@@ -276,6 +284,21 @@ class WpTools{
         $content = str_replace("function_exists('__')", "function_exists('___')", $content);
         $content = str_replace('function __', 'function ___', $content);
         file_put_contents($helpersPath, $content);
+    }
+	
+    public static function rename_woo_wakeup()
+    {
+		$wordpress_path = env('WP_LOAD_PATH');
+        $file1 = $wordpress_path . '/wp-content/plugins/woocommerce/includes/rest-api/Utilities/SingletonTrait.php';
+		$file2 = $wordpress_path . '/wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php';
+
+        if ( ! file_exists($file2)) {
+            return;
+        }
+
+        $content = file_get_contents($file2);
+        $content = str_replace("private function __wakeup()", "public function __wakeup()", $content);
+        file_put_contents($file2, $content);
     }
 	
 }
