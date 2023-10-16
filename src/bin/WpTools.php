@@ -232,6 +232,8 @@ class WpTools{
 		$db_user = env('DB_USERNAME');
 		$db_host = env('DB_HOST');
 		
+		try {
+		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);
 		// Check connection
 		if (mysqli_connect_errno()){
@@ -240,7 +242,7 @@ class WpTools{
 		   Log::info("success conection");
 		 }
 				
-		try {
+		
 			Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
 	 		$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
 	 		$conn->close();
