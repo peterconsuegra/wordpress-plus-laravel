@@ -241,13 +241,24 @@ class WpTools{
 		}
 		
 		$check = $conn->query("SHOW COLUMNS FROM $table LIKE '$column_name'");
-		$num = mysqli_num_rows($check);
 		
-		if($num == 0){
-			Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
-		 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+		if(is_bool($check)){
+			//MYSQL
+			Log::info("MySQL DB");
+			if(!$check){
+				Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
+			 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+			}
+		}else{
+			//MariaDB DOCKER
+			Log::info("MariaDB DB");
+			$num = mysqli_num_rows($check);
+			if($num == 0){
+				Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
+			 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+			}
 		}
-		
+
 	 	$conn->close();
 		
 	}
