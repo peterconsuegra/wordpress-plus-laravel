@@ -206,10 +206,8 @@ class WpTools{
 		file_put_contents($file, $lines);
 	}
 	
-	public static function set_column_to_null_by_default($table,$column_name){
-		$db_name = env('DB_DATABASE');
-		$db_user_pass = env('DB_PASSWORD');
-		$db_user = env('DB_USERNAME');
+	public static function set_column_to_null_by_default($table,$column_name,$db_name,$db_user,$db_user_pass){
+	
 		$db_host = env('DB_HOST');
 		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);
@@ -225,11 +223,8 @@ class WpTools{
 		$conn->close();
 	}
 	
-	public static function add_column_to_table($table,$column_name,$data_type,$column_after){
+	public static function add_column_to_table($table,$column_name,$data_type,$column_after,$db_name,$db_user,$db_user_pass){
 		
-		$db_name = env('DB_DATABASE');
-		$db_user_pass = env('DB_PASSWORD');
-		$db_user = env('DB_USERNAME');
 		$db_host = env('DB_HOST');
 		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);

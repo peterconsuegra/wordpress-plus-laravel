@@ -23,7 +23,7 @@ class NewWordPressPlusLaravel extends Command {
      *
      * @var string
      */
-    protected $signature = 'new_wordpress_plus_laravel {--integration_type=}';
+    protected $signature = 'new_wordpress_plus_laravel {--db_user=} {--db_name=} {--db_pass=}';
 
     
     public function handle() {
@@ -33,6 +33,14 @@ class NewWordPressPlusLaravel extends Command {
 		$num = substr($version, 0, 3);
 		$float_version = (float)$num;
 		$this->comment("Laravel version: ".$float_version);
+		
+		$db_user = $this->option('db_user');
+		$db_name = $this->option('db_name');
+		$db_pass = $this->option('db_pass');
+		
+		//$this->comment("db_user: ".$db_user);
+		//$this->comment("db_name: ".$db_name);
+		//$this->comment("db_pass: ".$db_pass);
 		
 		//Replace migrations if table exists
 		WpTools::replace_migration_if_table_exists("users","create_users_table.php");
@@ -67,10 +75,10 @@ class NewWordPressPlusLaravel extends Command {
 		
 		//SQL HACKS
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
-		WpTools::set_column_to_null_by_default("wp_users","user_registered");
+		WpTools::set_column_to_null_by_default("wp_users","user_registered",$db_name,$db_user,$db_pass);
 		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
 		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
-		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name");
+		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name",$db_name,$db_user,$db_pass);
 		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
 		
 		//ADD HELLO CONTROLLER FOR BUILT IN EXAMPLES
