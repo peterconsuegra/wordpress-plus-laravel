@@ -23,7 +23,7 @@ class NewWordPressPlusLaravel extends Command {
      *
      * @var string
      */
-    protected $signature = 'new_wordpress_plus_laravel {--integration_type=}';
+    protected $signature = 'new_wordpress_plus_laravel {--db_user=} {--db_name=} {--db_pass=} {--integration_type=}';
 
     
     public function handle() {
@@ -33,6 +33,14 @@ class NewWordPressPlusLaravel extends Command {
 		$num = substr($version, 0, 3);
 		$float_version = (float)$num;
 		$this->comment("Laravel version: ".$float_version);
+		
+		$db_user = $this->option('db_user');
+		$db_name = $this->option('db_name');
+		$db_pass = $this->option('db_pass');
+		
+		//$this->comment("db_user: ".$db_user);
+		//$this->comment("db_name: ".$db_name);
+		//$this->comment("db_pass: ".$db_pass);
 		
 		//Replace migrations if table exists
 		WpTools::replace_migration_if_table_exists("users","create_users_table.php");
@@ -67,10 +75,10 @@ class NewWordPressPlusLaravel extends Command {
 		
 		//SQL HACKS
 		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
-		WpTools::set_column_to_null_by_default("wp_users","user_registered");
+		WpTools::set_column_to_null_by_default("wp_users","user_registered",$db_name,$db_user,$db_pass);
 		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
 		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
-		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name");
+		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name",$db_name,$db_user,$db_pass);
 		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
 		
 		//ADD HELLO CONTROLLER FOR BUILT IN EXAMPLES
@@ -96,6 +104,9 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::renameHelperFunctions();
 		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
 		
+		WpTools::rename_woo_wakeup();
+		$this->comment("Rename woo wakeup method private function __wakeup() to public function __wakeup() in /wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php");
+		
 		//ADD REFERENCE TO WPAuthMiddleware::class
 		if($float_version <= 5.6){
 			
@@ -111,57 +122,7 @@ class NewWordPressPlusLaravel extends Command {
 			
 		}
 		
-		if($this->option('integration_type') == "inside_wordpress"){
-			
-			$this->comment("Inside WordPress option");
-			rename(base_path()."/public/.htaccess", base_path()."/.htaccess");
-			
-			//delete index.php file
-			unlink(base_path()."/public/index.php");
-			
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/files/index.php";
-			$file_path = base_path()."/index.php";	
-			WpTools::insert_template($template_path,$file_path);
-			
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples_inside_wordpress.blade.php";
-			$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file wordpress_code_example.php ");
-			
-
-	        //ADD HELLO CONTROLLER VIEWS
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_post_inside.blade.php";
-			$file_path = base_path()."/resources/views/edit_post.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_post.blade.php ");
 		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_posts_inside.blade.php";
-			$file_path = base_path()."/resources/views/edit_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_posts.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_orders_inside.blade.php";
-			$file_path = base_path()."/resources/views/list_orders.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_orders.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_posts_inside.blade.php";
-			$file_path = base_path()."/resources/views/list_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_posts.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_products_inside.blade.php";
-			$file_path = base_path()."/resources/views/list_products.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_products.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_users_inside.blade.php";
-			$file_path = base_path()."/resources/views/list_users.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_users.blade.php");
-			
-
-		}else{
 			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples.blade.php";
 			$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
 			WpTools::insert_template($template_path,$file_path);
@@ -198,7 +159,7 @@ class NewWordPressPlusLaravel extends Command {
 			WpTools::insert_template($template_path,$file_path);
 			$this->comment("Add file list_users.blade.php");
 			
-		}
+		
 
 		
     }
