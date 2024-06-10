@@ -174,6 +174,7 @@ class WpTools{
 			}
 			
 		}
+		return "not_found";
 	}
 	
 	public static function get_user_namespace($file,$pointer){
