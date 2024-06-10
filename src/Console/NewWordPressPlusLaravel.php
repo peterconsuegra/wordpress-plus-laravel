@@ -162,6 +162,7 @@ class NewWordPressPlusLaravel extends Command {
 			WpTools::insert_template($template_path,$file_path);
 			$this->comment("Add file list_users.blade.php");
 		*/
+		$this->comment("before integration_type WordPress option");
 		
 		if($this->option('integration_type') == "inside_wordpress"){
 			
