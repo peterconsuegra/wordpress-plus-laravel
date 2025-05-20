@@ -81,12 +81,13 @@ class NewWordPressPlusLaravel extends Command {
 		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
 		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name",$db_name,$db_user,$db_pass);
 		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
-		
+		*/
 		//ADD HELLO CONTROLLER FOR BUILT IN EXAMPLES
 		$controller_template_path = WpTools::get_hello_controller($float_version);
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	
 		WpTools::insert_template($controller_template_path,$file_path);
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
+		
 		
 		
 		//ADD HELLO CONTROLLER ROUTES
@@ -99,14 +100,15 @@ class NewWordPressPlusLaravel extends Command {
 			$code = "use App\Http\Controllers\HelloController;";
 			WpTools::add_code_to_file($file_path,'/*',$code);
 		}
+
 		
 		//FIX renameHelperFunctions
 		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
-		WpTools::renameHelperFunctions();
-		$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
+		//WpTools::renameHelperFunctions();
+		//$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
 		
-		WpTools::rename_woo_wakeup();
-		$this->comment("Rename woo wakeup method private function __wakeup() to public function __wakeup() in /wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php");
+		//WpTools::rename_woo_wakeup();
+		//$this->comment("Rename woo wakeup method private function __wakeup() to public function __wakeup() in /wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php");
 		
 		//ADD REFERENCE TO WPAuthMiddleware::class
 		if($float_version <= 5.6){
@@ -123,7 +125,6 @@ class NewWordPressPlusLaravel extends Command {
 			
 		}
 		
-		*/
 		$this->comment("before integration_type WordPress option");
 		
 		if($this->option('integration_type') == "inside_wordpress"){
