@@ -43,12 +43,12 @@ class NewWordPressPlusLaravel extends Command {
 		//$this->comment("db_pass: ".$db_pass);
 		
 		//Replace migrations if table exists
-		WpTools::replace_migration_if_table_exists("users","create_users_table.php");
-		WpTools::replace_migration_if_table_exists("password_resets","create_password_resets_table.php");
+		//WpTools::replace_migration_if_table_exists("users","create_users_table.php");
+		//WpTools::replace_migration_if_table_exists("password_resets","create_password_resets_table.php");
 		
-		$user_model_path = WpTools::search_file(base_path(),"User.php","namespace App");
-		$user_model_path = WpTools::$file_path;
-		$user_reference = WpTools::get_user_namespace($user_model_path,"namespace");
+		//$user_model_path = WpTools::search_file(base_path(),"User.php","namespace App");
+		//$user_model_path = WpTools::$file_path;
+		//$user_reference = WpTools::get_user_namespace($user_model_path,"namespace");
 		
 		//SET WPAuthMiddleware.php
 		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
@@ -57,9 +57,10 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
 		//Add user model to WPAuthMiddleware
-		WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
+		//WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 		
 		//SET USER MODEL	
+		/*
 		if (WpTools::get_code_in_file($user_model_path,"wp_users") == "not_found"){
 			WpTools::delete_code_in_file($file_path,"'users'");
 			WpTools::delete_code_in_file($file_path,'$primaryKey');
@@ -122,45 +123,6 @@ class NewWordPressPlusLaravel extends Command {
 			
 		}
 		
-		
-		
-		
-		/*
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/wordpress_plus_laravel_examples.blade.php";
-			$file_path = base_path()."/resources/views/wordpress_plus_laravel_examples.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file wordpress_code_example.php ");
-			
-	        //ADD HELLO CONTROLLER VIEWS
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_post.blade.php";
-			$file_path = base_path()."/resources/views/edit_post.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_post.blade.php ");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_posts.blade.php";
-			$file_path = base_path()."/resources/views/edit_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_posts.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_orders.blade.php";
-			$file_path = base_path()."/resources/views/list_orders.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_orders.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_posts.blade.php";
-			$file_path = base_path()."/resources/views/list_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_posts.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_products.blade.php";
-			$file_path = base_path()."/resources/views/list_products.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_products.blade.php");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_users.blade.php";
-			$file_path = base_path()."/resources/views/list_users.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file list_users.blade.php");
 		*/
 		$this->comment("before integration_type WordPress option");
 		

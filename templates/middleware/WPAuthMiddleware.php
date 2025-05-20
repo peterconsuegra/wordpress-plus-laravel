@@ -1,45 +1,36 @@
 <?php
-
 namespace App\Http\Middleware;
 
 use Closure;
-use Log;
-
-
-/*user model
-*/
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class WPAuthMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
-	
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-    	include_once(env('WP_LOAD_PATH')."/wp-load.php");  
-	
-        $wp_user = wp_get_current_user();
-			
-        if ($wp_user->ID > 0) {
-			
-			$current_user = Auth::loginUsingId($wp_user->ID,true);
-			$user = User::find($wp_user->ID);
-		
-			#Log::info("usuario logeado: ".$wp_user->user_login);
-			#Log::info("usuario logeado desde laravel: ".$current_user->user_login);
-			#Log::info("usuario elocuent: ".$user->user_login);
-			
-        } else {
-            Auth::logout();
-            return redirect(env('WP_URL').'/wp-login.php');
+        $cookieHeader = $request->header('Cookie', '');
+        $wpSite = env('WP_URL');
+        //$wpSite   = config('services.wp.url');
+        $endpoint = "{$wpSite}/wp-json/pete/v1/is-logged-in";
+
+        $response = Http::withHeaders([
+            'Cookie' => $cookieHeader,
+        ])->get($endpoint);
+
+        if (! $response->ok()) {
+            abort(502, 'Cannot reach WordPress for auth check.');
         }
-		
+
+        $wp = $response->json();
+
+        if (empty($wp['logged_in'])) {
+            $loginUrl = "{$wpSite}/wp-login.php?redirect_to=" . urlencode(url()->full());
+            return redirect()->away($loginUrl);
+        }
+
+        $request->attributes->set('wp_user', $wp);
+
         return $next($request);
     }
 }
