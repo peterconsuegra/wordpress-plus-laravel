@@ -13,19 +13,20 @@ class WPAuthMiddleware
         $wpSite = env('WP_URL');
         //$wpSite   = config('services.wp.url');
         $endpoint = "{$wpSite}/wp-json/pete/v1/is-logged-in";
+        $loginUrl = "{$wpSite}/wp-login.php?redirect_to=" . urlencode(url()->full());
 
         $response = Http::withHeaders([
             'Cookie' => $cookieHeader,
         ])->get($endpoint);
 
         if (! $response->ok()) {
-            abort(502, 'Cannot reach WordPress for auth check.');
+            //abort(502, 'Cannot reach WordPress for auth check.');
+            return redirect()->away($loginUrl);
         }
 
         $wp = $response->json();
 
         if (empty($wp['logged_in'])) {
-            $loginUrl = "{$wpSite}/wp-login.php?redirect_to=" . urlencode(url()->full());
             return redirect()->away($loginUrl);
         }
 

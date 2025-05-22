@@ -3,99 +3,76 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
-use Log;
 use View;
 
 class HelloController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.wp');
+
+        $public_path = base_path();
+        $app_route   = explode("/", $public_path);
+        $app_route   = "/".$app_route[array_key_last($app_route)];
+
+        View::share(compact('app_route'));
+    }
+
+    public function wordpress_plus_laravel_examples()
+    {
+        return view('wordpress_plus_laravel_examples');
+    }
+
+    public function list_users(Request $request)
+    {
+        $users = $this->fetchFromWp($request, 'users');
+        return view('list_users', compact('users'));
+    }
+
+    public function list_posts(Request $request)
+    {
+        $posts = $this->fetchFromWp($request, 'posts');
+        return view('list_posts', compact('posts'));
+    }
+
+    public function list_products(Request $request)
+    {
+        $products = $this->fetchFromWp($request, 'products');
+        return view('list_products', compact('products'));
+    }
+
+    public function list_orders(Request $request)
+    {
+        $orders = $this->fetchFromWp($request, 'orders');
+        return view('list_orders', compact('orders'));
+    }
+
     /**
-     * Display a listing of the resource.
+     * Hace una llamada GET al endpoint /pete/v1/{resource},
+     * pasando la cookie de WP y redirigiendo al login si falla.
      *
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param  string   $resource  'users'|'posts'|'products'|'orders'
+     * @return array
      */
-	
-	public function __construct()
-	{
-	     $this->middleware('auth.wp');
-		 
-  		$public_path = base_path();
-  		$app_route = explode("/", $public_path);
-  		$app_route = $app_route[array_key_last($app_route)];
-  		$app_route = "/$app_route";
-		 
- 		 View::share(compact('app_route'));
-	}
-		
-	public function wordpress_plus_laravel_examples(){
-		
-		
-		return view('wordpress_plus_laravel_examples');
-	}
-	
-	public function list_users(){
-		
-		$blogusers = get_users( array( 'fields' => array( 'display_name','user_email','ID') ) );
-		return view('list_users',compact('blogusers'));
-	}
-	
-	public function list_posts(){
-		
-		return view('list_posts');
-	}
-	
-	public function list_products(){
-		
-		
-	    $args = array(
-	        'post_type'      => 'product',
-	        'posts_per_page' => 10,
-	       // 'product_cat'    => 'hoodies'
-	    );
+    protected function fetchFromWp(Request $request, string $resource): array
+    {
+        $cookie = $request->header('Cookie', '');
+        $wpUrl  = rtrim(env('WP_URL'), '/');
+        $url    = "{$wpUrl}/wp-json/pete/v1/{$resource}";
 
-	    $products = new \WP_Query( $args );
-		
-		return view('list_products',compact('products'));
-	}
-	
-	public function list_orders(){
-		
-		$users = get_users( array( 'fields' => array( 'display_name','user_email','ID') ) );
-		
-		return view('list_orders',compact('users'));
-	}
-	
-	public function edit_posts(){
-		
-		return view('edit_posts');
-	}
-	
-	public function edit_post(){
-		$post_id = Input::get('post_id');
-		$post = get_post( $post_id );
-		return view('edit_post',compact('post'));
-	}
-	
-	public function update_post(){
-		
-		$post_id = input::get('post_id');
-		$post_content = input::get('post_content');
-		$post_title = input::get('post_title');
-		
-		wp_update_post(
-			array (
-				'ID'            => $post_id,
-				'post_content'     => $post_content,
-				'post_title' => $post_title
-			)
-		);
-		
-		return Redirect::to('/edit_posts');
-	}
+        $response = Http::withHeaders([
+            'Cookie' => $cookie,
+        ])->get($url);
 
-   
+        if (! $response->successful()) {
+            $loginUrl = "{$wpUrl}/wp-login.php?redirect_to=" . urlencode(url()->full());
+            Redirect::away($loginUrl)->send();
+            exit; // asegurarnos de no seguir ejecutando
+        }
+
+        return $response->json();
+    }
 }

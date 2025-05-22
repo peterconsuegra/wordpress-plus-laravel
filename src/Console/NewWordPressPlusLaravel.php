@@ -146,16 +146,6 @@ class NewWordPressPlusLaravel extends Command {
 			
 
 	        //ADD HELLO CONTROLLER VIEWS
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_post_inside.blade.php";
-			$file_path = base_path()."/resources/views/edit_post.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_post.blade.php ");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_posts_inside.blade.php";
-			$file_path = base_path()."/resources/views/edit_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_posts.blade.php");
-		
 			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_orders_inside.blade.php";
 			$file_path = base_path()."/resources/views/list_orders.blade.php";	
 			WpTools::insert_template($template_path,$file_path);
@@ -184,16 +174,6 @@ class NewWordPressPlusLaravel extends Command {
 			$this->comment("Add file wordpress_code_example.php ");
 			
 	        //ADD HELLO CONTROLLER VIEWS
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_post.blade.php";
-			$file_path = base_path()."/resources/views/edit_post.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_post.blade.php ");
-		
-			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/edit_posts.blade.php";
-			$file_path = base_path()."/resources/views/edit_posts.blade.php";	
-			WpTools::insert_template($template_path,$file_path);
-			$this->comment("Add file edit_posts.blade.php");
-		
 			$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/views/list_orders.blade.php";
 			$file_path = base_path()."/resources/views/list_orders.blade.php";	
 			WpTools::insert_template($template_path,$file_path);
