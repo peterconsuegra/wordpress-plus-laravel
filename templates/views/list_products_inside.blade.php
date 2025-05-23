@@ -14,56 +14,55 @@
     <body>
 
 		<div class="container">
-			<br />
-			 <h3>List Woocommerce products</h3> 
-			 <h6>With WordPress Pete you can use WordPress classes and methods in views or controller:</h6>
-			 
-			 @if ( class_exists( 'WooCommerce' ) ) 
-			   // code that requires WooCommerce
-			 
-			
-			<p>Executing WordPress code from view:</p>
-			<?php  
-			
-				//With WordPress Pete you can use WordPress methods in views or contoller
-			
-			    $args = array(
-			        'post_type'      => 'product',
-			        'posts_per_page' => 10,
-			       // 'product_cat'    => 'hoodies'
-			    );
 
-			    $loop = new WP_Query( $args );
+		 <h3>Woocommerce products</h3>     
 
-			    while ( $loop->have_posts() ) : $loop->the_post();
-			        global $product;
-			        echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
-			    endwhile;
-
-			    wp_reset_query();
-			?>
-			
-			
-			<p>Using WordPress code from controller:</p>
-			
-			<?php  
-			
-				//With WordPress Pete you can use WordPress methods in views or contoller
-			
-			    while ( $products->have_posts() ) : $products->the_post();
-			        global $product;
-			        echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
-			    endwhile;
-
-			    wp_reset_query();
-			?>
-			
-		 @else
-		   // you don't appear to have WooCommerce activated
-		 @endif
+			<table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>SKU</th>
+                <th>Precio</th>
+                <th>Precio Regular</th>
+                <th>Precio Oferta</th>
+                <th>Enlace</th>
+                <th>Imagen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($products as $prod)
+                <tr>
+                    <td>{{ $prod['id'] }}</td>
+                    <td>{{ $prod['name'] }}</td>
+                    <td>{{ $prod['sku'] }}</td>
+                    <td>{{ $prod['price'] }}</td>
+                    <td>{{ $prod['regular_price'] }}</td>
+                    <td>{{ $prod['sale_price'] ?: '—' }}</td>
+                    <td>
+                        <a href="{{ $prod['permalink'] }}" target="_blank">
+                            Ver producto
+                        </a>
+                    </td>
+                    <td>
+                        @if($prod['image'])
+                            <img src="{{ $prod['image'] }}" alt="{{ $prod['name'] }}" style="max-height:50px;">
+                        @else
+                            —
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="8">No se encontraron productos.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 		 
 		<br />
 		<a href="{{$app_route}}/wordpress_plus_laravel_examples">List examples</a>
+	</div>
 
     </body>
 </html>

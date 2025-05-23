@@ -14,39 +14,32 @@
     <body>
 
 		<div class="container">
-			
-			
-			
-			<br />
 	
-		  <h3>List WordPress users</h3>            
-		  <table class="table table-hover">
-		    <thead>
-		      <tr>
-		        <th>ID</th>
-		        <th>Display name</th>
-		        <th>Email</th>
-		      </tr>
-		    </thead>
-		    <tbody>
-				<?php foreach ( $blogusers as $user ) {
-					
-					?>
-					
-	  		      <tr>
-	  		        <td>{{$user->ID}}</td>
-	  		        <td>{{$user->display_name}}</td>
-	  		        <td>{{$user->user_email}}</td>
-	  		      </tr>
-				  
-				  </tr>
-				  
-				<?php 	
-				}
-				?>
-		      
-		    </tbody>
-		  </table>
+		  <h3>WordPress users</h3>            
+		   <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Roles</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($users as $user)
+                <tr>
+                    <td>{{ $user['id'] }}</td>
+                    <td>{{ $user['name'] }}</td>
+                    <td>{{ $user['email'] }}</td>
+                    <td>{{ implode(', ', $user['roles']) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4">No users found.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 		  
 		<br />
 		<a href="{{$app_route}}/wordpress_plus_laravel_examples">List examples</a>
