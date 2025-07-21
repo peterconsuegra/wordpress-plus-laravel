@@ -37,6 +37,7 @@ class NewWordPressPlusLaravel extends Command {
 		$db_user = $this->option('db_user');
 		$db_name = $this->option('db_name');
 		$db_pass = $this->option('db_pass');
+
 		
 		//$this->comment("db_user: ".$db_user);
 		//$this->comment("db_name: ".$db_name);
