@@ -43,8 +43,8 @@ class NewWordPressPlusLaravel extends Command {
 		//$this->comment("db_pass: ".$db_pass);
 		
 		//Replace migrations if table exists
-		//WpTools::replace_migration_if_table_exists("users","create_users_table.php");
-		//WpTools::replace_migration_if_table_exists("password_resets","create_password_resets_table.php");
+		WpTools::replace_migration_if_table_exists("users","create_users_table.php");
+		WpTools::replace_migration_if_table_exists("password_resets","create_password_resets_table.php");
 		
 		//$user_model_path = WpTools::search_file(base_path(),"User.php","namespace App");
 		//$user_model_path = WpTools::$file_path;
