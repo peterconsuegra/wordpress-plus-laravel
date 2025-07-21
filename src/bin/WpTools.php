@@ -174,6 +174,7 @@ class WpTools{
 			}
 			
 		}
+		return "not_found";
 	}
 	
 	public static function get_user_namespace($file,$pointer){
@@ -206,10 +207,8 @@ class WpTools{
 		file_put_contents($file, $lines);
 	}
 	
-	public static function set_column_to_null_by_default($table,$column_name){
-		$db_name = env('DB_DATABASE');
-		$db_user_pass = env('DB_PASSWORD');
-		$db_user = env('DB_USERNAME');
+	public static function set_column_to_null_by_default($table,$column_name,$db_name,$db_user,$db_user_pass){
+	
 		$db_host = env('DB_HOST');
 		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);
@@ -225,25 +224,39 @@ class WpTools{
 		$conn->close();
 	}
 	
-	public static function add_column_to_table($table,$column_name,$data_type,$column_after){
+	public static function add_column_to_table($table,$column_name,$data_type,$column_after,$db_name,$db_user,$db_user_pass){
 		
-		$db_name = env('DB_DATABASE');
-		$db_user_pass = env('DB_PASSWORD');
-		$db_user = env('DB_USERNAME');
 		$db_host = env('DB_HOST');
 		
 		$conn=mysqli_connect($db_host,$db_user,$db_user_pass,$db_name);
 		// Check connection
 		if (mysqli_connect_errno()){
-		  Log::info("Failed to connect to MySQL: " . mysqli_connect_error());
-		 }else{
-		   Log::info("success conection");
-		 }
+			Log::info("Failed to connect to MySQL: " . mysqli_connect_error());
+			}else{
+		   	Log::info("success conection");
+		}
 		
-		Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
- 		$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
- 		$conn->close();
+		$check = $conn->query("SHOW COLUMNS FROM $table LIKE '$column_name'");
+		
+		if(is_bool($check)){
+			//MYSQL
+			Log::info("MySQL DB");
+			if(!$check){
+				Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
+			 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+			}
+		}else{
+			//MariaDB DOCKER
+			Log::info("MariaDB DB");
+			$num = mysqli_num_rows($check);
+			if($num == 0){
+				Log::info("ALTER TABLE $table ADD $column_name $data_type NULL");
+			 	$conn->query("ALTER TABLE $table ADD $column_name $data_type NULL");
+			}
+		}
 
+	 	$conn->close();
+		
 	}
 	
 	public static function add_code_to_end_of_file($file,$var,$first=true){
@@ -276,6 +289,21 @@ class WpTools{
         $content = str_replace("function_exists('__')", "function_exists('___')", $content);
         $content = str_replace('function __', 'function ___', $content);
         file_put_contents($helpersPath, $content);
+    }
+	
+    public static function rename_woo_wakeup()
+    {
+		$wordpress_path = env('WP_LOAD_PATH');
+        $file1 = $wordpress_path . '/wp-content/plugins/woocommerce/includes/rest-api/Utilities/SingletonTrait.php';
+		$file2 = $wordpress_path . '/wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php';
+
+        if ( ! file_exists($file2)) {
+            return;
+        }
+
+        $content = file_get_contents($file2);
+        $content = str_replace("private function __wakeup()", "public function __wakeup()", $content);
+        file_put_contents($file2, $content);
     }
 	
 }

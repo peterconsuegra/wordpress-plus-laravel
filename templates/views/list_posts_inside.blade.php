@@ -13,32 +13,39 @@
 
     <body>
 		
-		
-		
-
 		<div class="container">
-			<br />
-			 <h3>List WordPress posts</h3> 
-			
-			<?php
-			    $args = array(
-			        'post_type' => 'post'
-			    );
 
-			    $post_query = new WP_Query($args);
+			 <h3>WordPress posts</h3>     
 
-			    if($post_query->have_posts() ) {
-			        while($post_query->have_posts() ) {
-			            $post_query->the_post();
-			            ?>
-			            <h2><?php the_title(); ?></h2>
-						<p>{{the_excerpt()}}</p>
-			            <?php
-			            }
-			        }
-			?>
-			
-		<br />
+			<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Título</th>
+					<th>Fecha</th>
+					<th>Extracto</th>
+					<th>Enlace</th>
+				</tr>
+			</thead>
+			<tbody>
+				@forelse($posts as $post)
+					<tr>
+						<td>{{ $post['id'] }}</td>
+						<td>{{ $post['title'] }}</td>
+						<td>{{ date('Y-m-d H:i', strtotime($post['date'])) }}</td>
+						<td>{{ \Illuminate\Support\Str::limit($post['excerpt'], 100) }}</td>
+						<td><a href="{{ $post['link'] }}" target="_blank">Ver</a></td>
+					</tr>
+				@empty
+					<tr>
+						<td colspan="5">No hay posts publicados.</td>
+					</tr>
+				@endforelse
+			</tbody>
+		</table>
+
 		<a href="{{$app_route}}/wordpress_plus_laravel_examples">List examples</a>
+
+		</div>
     </body>
 </html>

@@ -16,50 +16,42 @@
 		<div class="container">
 			
 			<br />		
-			 <h3>List Woocommerce orders by user</h3>  
+			 <h3>WooCommerce orders</h3>  
 			 
-			 @if ( class_exists( 'WooCommerce' ) ) 
-			  
-
-			@foreach ( $users as $user ) 
-				
-				<p>{{$user->user_email}} order:</p>
-				
-				<?php
-				$args = array(
-				    'customer_id' => $user->ID
-				);
-				$orders = wc_get_orders($args);
-				?>
-				
-	  		  <table class="table table-hover">
-	  		    <thead>
-	  		      <tr>
-	  		        <th>ID</th>
-	  		        <th>Status</th>
-	  		        <th>Total</th>
-	  		      </tr>
-	  		    </thead>
-	  		    <tbody>
-				
-				@foreach( $orders as $order )
-  	  		      <tr>
-  	  		        <td>{{$order->get_id()}}</td>
-  	  		        <td>{{$order->get_status()}}</td>
-  	  		        <td>{{$order->get_total()}}</td>
-  	  		      </tr>
-				  
-  				  </tr>
-					
-				@endforeach
-				
-			</table>
-			
-			@endforeach
-			
-			@else
-			// you don't appear to have WooCommerce activated
-			@endif
+			<table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Moneda</th>
+                <th>Cliente (ID)</th>
+                <th>Email Cliente</th>
+                <th>Teléfono Cliente</th>
+                <th>Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($orders as $order)
+                <tr>
+                    <td>{{ $order['id'] }}</td>
+                    <td>{{ \Carbon\Carbon::parse($order['date_created'])->format('Y-m-d H:i') }}</td>
+                    <td>{{ ucfirst($order['status']) }}</td>
+                    <td>{{ number_format($order['total'], 2) }}</td>
+                    <td>{{ $order['currency'] }}</td>
+                    <td>{{ $order['customer_id'] }}</td>
+                    <td>{{ $order['billing_email'] }}</td>
+                    <td>{{ $order['billing_phone'] }}</td>
+                    <td>{{ $order['item_count'] }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="9">No se encontraron pedidos.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 			
 			<br />
 			<a href="/wordpress_plus_laravel_examples">List examples</a>
