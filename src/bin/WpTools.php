@@ -8,7 +8,15 @@ use Log;
 class WpTools{
 	
 	public static $file_path;
-	
+
+	public static function create_folder($path){
+		if (! is_dir($path)) {
+			// 0755 = rwxr-xr-x; `true` lets PHP create any missing parents
+			if (! mkdir($path, 0755, true) && ! is_dir($path)) {
+				throw new \RuntimeException("Failed to create directory: $path");
+			}
+		}
+	}
 	
 	public static function replace_migration_if_table_exists($table,$migration_file){
 		$dir = base_path()."/database/migrations";

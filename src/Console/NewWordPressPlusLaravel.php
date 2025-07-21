@@ -38,23 +38,14 @@ class NewWordPressPlusLaravel extends Command {
 		$db_name = $this->option('db_name');
 		$db_pass = $this->option('db_pass');
 
+		if($float_version >= 8){
+			$code = "use App\Http\Controllers\HelloController;";
+			WpTools::add_code_to_file($file_path,'/*',$code);
+		}
 		
-		//$this->comment("db_user: ".$db_user);
-		//$this->comment("db_name: ".$db_name);
-		//$this->comment("db_pass: ".$db_pass);
-		
-		//Replace migrations if table exists
-		WpTools::replace_migration_if_table_exists("users","create_users_table.php");
-		WpTools::replace_migration_if_table_exists("password_resets","create_password_resets_table.php");
-		
-		//$user_model_path = WpTools::search_file(base_path(),"User.php","namespace App");
-		//$user_model_path = WpTools::$file_path;
-		//$user_reference = WpTools::get_user_namespace($user_model_path,"namespace");
-		
-		//SET WPAuthMiddleware.php
-		//Add file WPAuthMiddleware to /app/Http/Middleware/WPAuthMiddleware.php
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/middleware/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
+		WPTools::create_folder(base_path()."/app/Http/Middleware/");
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
 		//Add user model to WPAuthMiddleware
@@ -97,10 +88,7 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_end_of_file($file_path,$routes_code);
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
 		
-		if($float_version >= 8){
-			$code = "use App\Http\Controllers\HelloController;";
-			WpTools::add_code_to_file($file_path,'/*',$code);
-		}
+		
 
 		
 		//FIX renameHelperFunctions
