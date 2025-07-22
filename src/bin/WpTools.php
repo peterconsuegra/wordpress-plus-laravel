@@ -97,7 +97,7 @@ class WpTools{
 	public static function get_hello_controller($laravel_version){
 		if($laravel_version <= 10){
 			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
-		}else if($laravel_version == 11){
+		}else if($laravel_version >= 11){
 			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController11.php";
 		}
 		return $controller_template_path;
