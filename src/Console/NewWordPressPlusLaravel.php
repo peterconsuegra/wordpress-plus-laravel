@@ -38,49 +38,25 @@ class NewWordPressPlusLaravel extends Command {
 		$db_name = $this->option('db_name');
 		$db_pass = $this->option('db_pass');
 
+		/*
 		if($float_version >= 8){
 			$code = "use App\Http\Controllers\HelloController;";
 			WpTools::add_code_to_file($file_path,'/*',$code);
 		}
-		
+		*/
+
+		// WPAuthMiddleware LOGIC
 		$template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/middleware/WPAuthMiddleware.php";
 		$file_path = base_path()."/app/Http/Middleware/WPAuthMiddleware.php";	
 		WPTools::create_folder(base_path()."/app/Http/Middleware/");
 		WpTools::insert_template($template_path,$file_path);
 		$this->comment("Add WPAuthMiddleware.php to /app/Http/Middleware/WPAuthMiddleware.php");
-		//Add user model to WPAuthMiddleware
-		//WpTools::add_code_to_file(base_path()."/app/Http/Middleware/WPAuthMiddleware.php",'/*user model',$user_reference);
 		
-		//SET USER MODEL	
-		/*
-		if (WpTools::get_code_in_file($user_model_path,"wp_users") == "not_found"){
-			WpTools::delete_code_in_file($file_path,"'users'");
-			WpTools::delete_code_in_file($file_path,'$primaryKey');
-			//Add primaryKey
-			$code = "protected " .'$primaryKey'." = 'ID';";
-			WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
-			$this->comment("Add code $code to $file_path");
-			//Add code protected $table = 'wp_users'; to app/User.php	
-			$code = "protected ".'$table'." = 'wp_users';";
-			WpTools::add_code_to_file_pro($user_model_path,'class User extends Authenticatable',$code,2);
-			$this->comment("Add code $code to $file_path");
-		}
-		
-		//SQL HACKS
-		//SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL
-		WpTools::set_column_to_null_by_default("wp_users","user_registered",$db_name,$db_user,$db_pass);
-		$this->comment("SQL operation: ALTER TABLE `wp_users` CHANGE `user_registered` `user_registered` DATETIME NULL DEFAULT NULL");	
-		//SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;
-		WpTools::add_column_to_table("wp_users","remember_token","VARCHAR(255)","display_name",$db_name,$db_user,$db_pass);
-		$this->comment("SQL operation: ALTER TABLE `wp_users` ADD `remember_token` VARCHAR(255) NULL AFTER `display_name`;");
-		*/
 		//ADD HELLO CONTROLLER FOR BUILT IN EXAMPLES
 		$controller_template_path = WpTools::get_hello_controller($float_version);
 		$file_path = base_path()."/app/Http/Controllers/HelloController.php";	
 		WpTools::insert_template($controller_template_path,$file_path);
 		$this->comment("Add HelloController.php to /app/Http/Controllers/HelloController.php");
-		
-		
 		
 		//ADD HELLO CONTROLLER ROUTES
 		$file_path = base_path()."/routes/web.php";
@@ -88,30 +64,22 @@ class NewWordPressPlusLaravel extends Command {
 		WpTools::add_code_to_end_of_file($file_path,$routes_code);
 		$this->comment("Add code Route::get('/', 'HelloController@wordpress_code_example'); to routes/web.php");
 		
-		
-
-		
-		//FIX renameHelperFunctions
-		//Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php
-		//WpTools::renameHelperFunctions();
-		//$this->comment("Rename helpers method __ to ___ in vendor/laravel/framework/src/Illuminate/Foundation/helpers.php");
-		
-		//WpTools::rename_woo_wakeup();
-		//$this->comment("Rename woo wakeup method private function __wakeup() to public function __wakeup() in /wp-content/plugins/woocommerce/packages/woocommerce-admin/src/FeaturePlugin.php");
-		
-		//ADD REFERENCE TO WPAuthMiddleware::class
-		if($float_version <= 5.6){
+		//ADD WPAuthMiddleware LOGIC
+		if($float_version <= 10){
 			
-			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
-			WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \Illuminate\Auth\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
-			$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
-			
-		}else{
-			
-			//Add code middleware "'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class," to app/Http/Kernel.php
+			//public static function add_code_to_file_pro($file,$pointer,$var,$row_plus)
 			WpTools::add_code_to_file(base_path()."/app/Http/Kernel.php","'auth' => \App\Http\Middleware\Authenticate::class,","'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class,");
 			$this->comment("Add code middleware 'auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class, to app/Http/Kernel.php");
 			
+		}else if($float_version > 10){
+
+			//public static function add_code_to_file_pro($file,$pointer,$var,$row_plus)
+			WpTools::add_code_to_file(base_path()."/bootstrap/app.php",'->withMiddleware(function (Middleware $middleware) {','$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
+			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
+
+			WpTools::add_code_to_file(base_path()."/bootstrap/app.php","middleware->alias(['auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class]);",'$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
+			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
+
 		}
 		
 		$this->comment("before integration_type WordPress option");

@@ -79,17 +79,8 @@ class WpTools{
 	
 	public static function get_laravel_routes_code($laravel_version){
 		$routes_code = "";
-		if($laravel_version < 8){
-			$routes_code .= "Route::get('list_users','HelloController@list_users');\n";
-			$routes_code .= "Route::get('list_orders', 'HelloController@list_orders');\n";
-			$routes_code .= "Route::get('list_posts', 'HelloController@list_posts');\n";
-			$routes_code .= "Route::get('list_products', 'HelloController@list_products');\n";
-			$routes_code .= "Route::get('edit_posts', 'HelloController@edit_posts');\n";
-			$routes_code .= "Route::get('edit_post', 'HelloController@edit_post');\n";
-			$routes_code .= "Route::post('update_post', 'HelloController@update_post');\n";
-			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', 'HelloController@wordpress_plus_laravel_examples');\n";
-			
-		}else{
+		if(($laravel_version >= 8 && $laravel_version <= 10)){
+			$routes_code .= "use App\Http\Controllers\HelloController;\n";
 			$routes_code .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
 			$routes_code .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
 			$routes_code .= "Route::get('list_posts', [HelloController::class,'list_posts']);\n";
@@ -99,14 +90,15 @@ class WpTools{
 			$routes_code .= "Route::post('update_post', [HelloController::class, 'update_post']);\n";
 			$routes_code .= "Route::get('/wordpress_plus_laravel_examples', [HelloController::class, 'wordpress_plus_laravel_examples']);\n";
 		}
+		
 		return $routes_code;
 	}
 	
 	public static function get_hello_controller($laravel_version){
-		if($laravel_version >= 6){
+		if($laravel_version <= 10){
 			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController6.php";
-		}else{
-			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController5.php";
+		}else if($laravel_version == 11){
+			$controller_template_path = base_path()."/vendor/peteconsuegra/wordpress-plus-laravel/templates/controllers/HelloController11.php";
 		}
 		return $controller_template_path;
 	}
