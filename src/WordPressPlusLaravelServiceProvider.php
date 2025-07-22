@@ -1,34 +1,29 @@
 <?php
 
-namespace Peterconsuegra\WordPressPlusLaravel;
+namespace Pete\WordPressPlusLaravel;
 
 use Illuminate\Support\ServiceProvider;
 
 class WordPressPlusLaravelServiceProvider extends ServiceProvider
 {
-    /**
-     * Boot the service provider.
-     *
-     * @return void
-     */
-	
-	
-    public function boot()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-				Console\NewWordPressPlusLaravel::class,
-            ]);
-        }
+    public function register()
+    {	
+        $this->app->singleton('wordpress-plus-laravel', function ($app) {
+            return new WordPressPlusLaravel;
+        });	
     }
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
+    public function boot()
     {
-        //
+        
+		$this->loadRoutesFrom(__DIR__.'/routes/web.php');
+		$this->loadViewsFrom(__DIR__.'/views', 'wordpress-plus-laravel-plugin');
+		
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+				Console\AdaptWordPressPlusLaravel::class,
+            ]);
+        }
+		
     }
 }
