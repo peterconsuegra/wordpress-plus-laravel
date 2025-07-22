@@ -79,7 +79,7 @@ class WpTools{
 	
 	public static function get_laravel_routes_code($laravel_version){
 		$routes_code = "";
-		if(($laravel_version >= 8 && $laravel_version <= 10)){
+		if($laravel_version >= 8){
 			$routes_code .= "use App\Http\Controllers\HelloController;\n";
 			$routes_code .= "Route::get('list_users', [HelloController::class,'list_users']);\n";
 			$routes_code .= "Route::get('list_orders', [HelloController::class,'list_orders']);\n";
