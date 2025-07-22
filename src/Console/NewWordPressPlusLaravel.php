@@ -77,7 +77,7 @@ class NewWordPressPlusLaravel extends Command {
 			WpTools::addCodeAfter(base_path()."/bootstrap/app.php",'->withMiddleware(function (Middleware $middleware) {','$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
 			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
 
-			WpTools::addCodeAfter(base_path()."/bootstrap/app.php","middleware->alias(['auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class]);",'$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
+			WpTools::addCodeAfter(base_path()."/bootstrap/app.php",'$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);','$middleware->alias(["auth.wp" => \App\Http\Middleware\WPAuthMiddleware::class]);');
 			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
 
 		}
