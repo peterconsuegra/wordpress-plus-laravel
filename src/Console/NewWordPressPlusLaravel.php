@@ -74,10 +74,10 @@ class NewWordPressPlusLaravel extends Command {
 		}else if($float_version > 10){
 
 			//public static function add_code_to_file_pro($file,$pointer,$var,$row_plus)
-			WpTools::add_code_to_file(base_path()."/bootstrap/app.php",'->withMiddleware(function (Middleware $middleware) {','$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
+			WpTools::addCodeAfter(base_path()."/bootstrap/app.php",'->withMiddleware(function (Middleware $middleware) {','$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
 			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
 
-			WpTools::add_code_to_file(base_path()."/bootstrap/app.php","middleware->alias(['auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class]);",'$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
+			WpTools::addCodeAfter(base_path()."/bootstrap/app.php","middleware->alias(['auth.wp' => \App\Http\Middleware\WPAuthMiddleware::class]);",'$middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);');
 			$this->comment('Add code $middleware->append(\App\Http\Middleware\WPAuthMiddleware::class);, to bootstrap/app.php');
 
 		}

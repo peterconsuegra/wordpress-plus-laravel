@@ -206,6 +206,31 @@ class WpTools{
 		}
 		file_put_contents($file, $lines);
 	}
+
+	public static function addCodeAfter(string $file, string $pointer, string $codeLine): void
+    {
+        // Read file as an array of lines (without trailing new-line chars)
+        $lines = file($file, FILE_IGNORE_NEW_LINES);
+
+        // Bail if the line is already present anywhere in the file
+        if (in_array(trim($codeLine), array_map('trim', $lines), true)) {
+            return;
+        }
+
+        $out       = [];
+        $inserted  = false;
+
+        foreach ($lines as $line) {
+            $out[] = $line;                        // keep current line
+            if (!$inserted && trim($line) === trim($pointer)) {
+                $out[]  = $codeLine;               // add our line right after pointer
+                $inserted = true;
+            }
+        }
+
+        // Persist changes (re-add new-line characters)
+        file_put_contents($file, implode(PHP_EOL, $out) . PHP_EOL);
+    }
 	
 	public static function set_column_to_null_by_default($table,$column_name,$db_name,$db_user,$db_user_pass){
 	
