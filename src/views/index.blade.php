@@ -37,7 +37,7 @@
         </div>
     @endif
 
-    {{-- Loading overlay + skeleton styles -------------------------------- --}}
+    {{-- small helpers / loader styles ------------------------------------ --}}
     <style>
       [v-cloak]{ display:none; }
       .table-loading-overlay{
@@ -58,11 +58,18 @@
     <div class="row">
         <div class="col-12">
             <div class="panel position-relative">
+
+                {{-- Loading overlay (matches sites/backups pages) --}}
+                <div v-if="loadingRows" class="table-loading-overlay text-center">
+                  <div class="spinner-border mb-3" role="status" aria-hidden="true"></div>
+                  <div class="text-muted">Loading integrations…</div>
+                </div>
+
                 <div class="panel-heading d-flex justify-content-between align-items-center">
                     <h3 class="mb-0 fs-5">My WordPress ↔ Laravel Syncs</h3>
 
                     <div class="d-flex align-items-center gap-2">
-                        {{-- Per-page selector (server-driven pagination) --}}
+                        {{-- Per-page selector (server-driven pagination UI) --}}
                         <form method="GET" action="{{ route('wpl.index') }}" class="d-inline-block">
                             <label for="per_page" class="form-label me-2 mb-0 small text-muted">Rows per page:</label>
                             <select name="per_page" id="per_page" class="form-select form-select-sm d-inline-block w-auto"
@@ -79,28 +86,7 @@
                     </div>
                 </div>
 
-                <!-- Loading overlay -->
-                <div v-if="loadingRows" class="table-loading-overlay text-center">
-                  <div class="spinner-border mb-3" role="status" aria-hidden="true"></div>
-                  <div class="text-muted">Loading integrations…</div>
-                </div>
-
                 <div class="table-responsive">
-                    @php
-                        /** Server payload → Vue fallback bootstrap **/
-                        $fallback = isset($sites) ? $sites->map(fn($s)=>[
-                            'id'   => (int)$s->id,
-                            'name' => (string)($s->name ?? $s->url ?? ''),
-                            'url'  => (string)($s->url ?? ''),
-                            'ssl'  => (bool)$s->ssl,
-                            'integration_type' => (string)($s->integration_type ?? '')
-                        ])->values()->all() : [];
-
-                        $totalServer = isset($sites) && method_exists($sites,'total')
-                            ? (int) $sites->total()
-                            : (\is_array($fallback) ? \count($fallback) : 0);
-                    @endphp
-
                     <table class="table table-hover table-striped align-middle mb-0">
                         <thead class="table-light">
                             <tr>
@@ -112,22 +98,24 @@
                             </tr>
                         </thead>
 
-                        <!-- Skeleton rows while loading -->
+                        {{-- Skeleton rows while loading --}}
                         <tbody v-if="loadingRows">
                           <tr v-for="n in 6" :key="'skel-'+n">
                             <td><div class="skel-row" style="width:40px"></div></td>
-                            <td><div class="skel-row" style="width:60%"></div></td>
-                            <td><div class="skel-row" style="width:75%"></div></td>
-                            <td class="text-center"><div class="skel-row mx-auto" style="width:24px"></div></td>
+                            <td><div class="skel-row" style="width:40%"></div></td>
+                            <td><div class="skel-row" style="width:70%"></div></td>
+                            <td class="text-center">
+                              <div class="d-inline-block" style="width:24px"><div class="skel-row"></div></div>
+                            </td>
                             <td class="text-end">
-                              <div class="d-inline-block" style="width:300px; max-width:100%">
+                              <div class="d-inline-block" style="width:380px; max-width:100%">
                                 <div class="skel-row" style="width:100%"></div>
                               </div>
                             </td>
                           </tr>
                         </tbody>
 
-                        <!-- Real rows once loaded -->
+                        {{-- Real rows (painted after "load") --}}
                         <tbody v-else-if="rows.length">
                             <tr v-for="site in rows" :key="site.id">
                                 <td class="text-muted">@{{ site.id }}</td>
@@ -143,24 +131,23 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm" role="group">
-
-                                        <!-- SSL (hide for inside_wordpress when we know the type) -->
+                                        <!-- SSL (hide for inside_wordpress) -->
                                         <button
                                             v-if="site.integration_type !== 'inside_wordpress'"
                                             class="btn btn-outline-secondary"
                                             :disabled="isBusy(site.id)"
                                             @click="generateSSL(site.id)"
                                             title="Generate SSL">
-                                            <i class="bi bi-lock"></i>
-                                            <span v-if="isBusy(site.id)" class="ms-1">Generating…</span>
-                                            <span v-else class="ms-1">generate SSL</span>
+                                            <i class="bi bi-lock-fill me-1"></i>
+                                            <span v-if="isBusy(site.id)">Generating…</span>
+                                            <span v-else>Generate SSL</span>
                                         </button>
 
                                         <!-- Logs -->
                                         <a :href="`${logsBase}/${site.id}`"
                                            class="btn btn-info"
                                            title="View logs">
-                                            <i class="bi bi-journal-text"></i> sync logs
+                                            <i class="bi bi-journal-text"></i> Logs
                                         </a>
 
                                         <!-- Delete -->
@@ -170,14 +157,14 @@
                                                 @click="confirmDelete(site)">
                                             <span v-if="deletingId === site.id" class="spinner-border spinner-border-sm me-1"></span>
                                             <i v-else class="bi bi-trash me-1"></i>
-                                            delete
+                                            Delete
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
 
-                        <!-- Empty state -->
+                        {{-- Empty state --}}
                         <tbody v-else>
                             <tr>
                               <td colspan="5" class="text-center p-5">
@@ -187,11 +174,9 @@
                         </tbody>
                     </table>
 
-                    <div class="panel-footer">
+                    <div class="panel-footer" v-if="!loadingRows">
                         <div class="d-flex justify-content-center mt-3">
-                            @if(isset($sites) && method_exists($sites,'links'))
-                                {{ $sites->withQueryString()->links('pagination::bootstrap-5') }}
-                            @endif
+                            {{ $sites->withQueryString()->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
 
@@ -211,44 +196,50 @@ const { createApp, nextTick } = Vue;
 createApp({
   data() {
     return {
-      // table state
-      loadingRows: true,
-      busyIds: new Set(),
+      // table state (async paint like sites/backups)
       rows: [],
       total: 0,
+      loadingRows: true,
+      busyIds: new Set(),
       deletingId: null,
 
       // routes
-      // We keep these to reuse your existing actions
       generateSslUrl: @json(route('wpl.generate-ssl', [], false)),
       deleteUrl: @json(route('wpl.delete', [], false)),
       logsBase: @json(rtrim(route('wpl.logs', 0), '/0')),
 
-      // server bootstrap payload (fallback → now primary)
-      serverFallback: @json($fallback ?? []),
-      serverTotal: @json($totalServer ?? 0),
+      // bootstrap payload from server
+      _bootstrapRows: @json($sitesPayload ?? []),
+      _bootstrapTotal: {{ (int) ($sites->total() ?? 0) }},
     };
   },
 
   async mounted() {
     await nextTick();
-    // Initialize from server payload immediately (no JSON endpoint required)
-    this.rows   = (this.serverFallback || []).map(s => ({
-      id: Number(s.id),
-      name: String(s.name ?? s.url ?? ''),
-      url: String(s.url ?? ''),
-      ssl: Boolean(s.ssl ?? false),
-      integration_type: String(s.integration_type ?? ''),
-    }));
-    this.total  = Number(this.serverTotal) || this.rows.length || 0;
-    this.updateTotalBadge();
-    this.loadingRows = false;
+    this.loadRows();
   },
 
   methods: {
-    updateTotalBadge() {
-      const totalEl = document.getElementById('wplTotalCount');
-      if (totalEl) totalEl.textContent = `${this.total} total`;
+    async loadRows() {
+      this.loadingRows = true;
+      try {
+        // brief delay so the overlay/skeleton is noticeable
+        await new Promise(r => setTimeout(r, 180));
+
+        this.rows = (this._bootstrapRows || []).map(s => ({
+          id: Number(s.id),
+          name: String(s.name ?? ''),
+          url: String(s.url ?? ''),
+          ssl: !!s.ssl,
+          integration_type: String(s.integration_type ?? ''),
+        }));
+        this.total = Number(this._bootstrapTotal) || this.rows.length || 0;
+
+        const totalEl = document.getElementById('wplTotalCount');
+        if (totalEl) totalEl.textContent = `${this.total} total`;
+      } finally {
+        this.loadingRows = false;
+      }
     },
 
     isBusy(id) { return this.busyIds.has(Number(id)); },
@@ -280,7 +271,10 @@ createApp({
         }
 
         window.toast?.('SSL generation started.', 'success');
-        // no JSON reload; the icon may change after backend finishes
+
+        // reflect in UI (optimistic)
+        const idx = this.rows.findIndex(r => r.id === Number(id));
+        if (idx !== -1) this.rows[idx].ssl = true;
       } catch {
         window.toast?.('Network error. Please try again.', 'error');
       } finally {
@@ -311,7 +305,9 @@ createApp({
         // Optimistic removal
         this.rows = this.rows.filter(s => s.id !== site.id);
         this.total = Math.max(0, this.total - 1);
-        this.updateTotalBadge();
+
+        const totalEl = document.getElementById('wplTotalCount');
+        if (totalEl) totalEl.textContent = `${this.total} total`;
 
         window.toast?.('Integration deleted successfully.', 'success');
       } catch (e) {

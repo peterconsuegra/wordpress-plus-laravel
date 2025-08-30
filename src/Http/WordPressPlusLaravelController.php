@@ -84,7 +84,16 @@ class WordPressPlusLaravelController extends Controller
 
 		$sites = $query->paginate($perPage)->withQueryString();
 
-        return view('wordpress-plus-laravel-plugin::index', compact('sites', 'currentUser', 'viewsw'));
+        $sitesPayload = $sites->getCollection()->map(function (Site $s) {
+			return [
+				'id'   => (int) $s->id,
+				'name' => (string) $s->name,
+				'url'  => (string) $s->url,
+				'ssl'  => (bool) $s->ssl,
+			];
+		})->values();
+
+        return view('wordpress-plus-laravel-plugin::index', compact('sites', 'currentUser', 'viewsw','sitesPayload'));
 	}
 
     /**
