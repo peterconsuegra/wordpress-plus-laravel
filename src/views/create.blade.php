@@ -1,7 +1,59 @@
 @extends('layout')
 
+@push('head')
+<style>
+  /* Spinner via pseudo-element; never touches the button label */
+  #create_button[data-loading="1"]{ position:relative; }
+  #create_button[data-loading="1"]::after{
+    content:"";
+    display:inline-block;
+    width:.9rem;height:.9rem;margin-left:.5rem;
+    border:.15rem solid currentColor;border-right-color:transparent;
+    border-radius:50%;
+    vertical-align:-2px;
+    animation:pete-spin .6s linear infinite;
+  }
+  @keyframes pete-spin { to { transform: rotate(360deg); } }
+
+  /* Pete button disabled state (matches sites/create.blade.php) */
+  .btn-pete:disabled,
+  .btn-pete[disabled]{
+    opacity:1 !important;
+    cursor:not-allowed;
+    color:#fff !important;
+    background-image:linear-gradient(135deg,var(--pete-blue) 0%,var(--pete-green) 100%) !important;
+    box-shadow:0 3px 8px rgba(0,0,0,.2) !important;
+    pointer-events:none; /* block hover/focus/active */
+  }
+  .btn-pete:disabled:hover,
+  .btn-pete:disabled:focus,
+  .btn-pete:disabled:active,
+  .btn-pete[disabled]:hover,
+  .btn-pete[disabled]:focus,
+  .btn-pete[disabled]:active{
+    background-image:linear-gradient(135deg,var(--pete-blue) 0%,var(--pete-green) 100%) !important;
+    color:#fff !important;
+    box-shadow:0 3px 8px rgba(0,0,0,.2) !important;
+    transform:none !important;
+    text-decoration:none !important;
+  }
+  /* Skeleton styles */
+  .skel-row{
+    height:14px;border-radius:6px;
+    background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+    background-size:400% 100%;
+    animation:skel 1.2s ease-in-out infinite;
+  }
+  @keyframes skel{ 0%{background-position:100% 0} 100%{background-position:0 0} }
+  .step-dot{ width:.75rem;height:.75rem;border-radius:50%;background-color:#ced4da;display:inline-block; }
+  .step.active .step-dot{ background-color:#0d6efd; }
+  .step-label{ font-size:.9rem }
+  [v-cloak]{ display:none; }
+</style>
+@endpush
+
 @section('content')
-<div id="wp-laravel-create" class="container-fluid">
+<div id="wp-laravel-create" class="container-fluid" v-cloak>
 
   {{-- hero ------------------------------------------------------------- --}}
   <div class="row align-items-center mb-5 g-4">
@@ -18,34 +70,35 @@
     <div class="alert alert-success">{{ session('status') }}</div>
   @endif
 
-  @if($errors->any())
-    <div class="alert alert-danger">
-      <div class="fw-semibold mb-2">Please fix the following:</div>
-      <ul class="mb-0">
-        @foreach($errors->all() as $e)
-          <li>{{ $e }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
+  {{-- Vue-driven error block (server/422 or client) --}}
+  <div v-if="Object.keys(errors).length" class="alert alert-danger">
+    <div class="fw-semibold mb-2">Please fix the following:</div>
+    <ul class="mb-0">
+      <li v-for="(msgs, field) in errors" :key="field">
+        <span v-for="(m, i) in [].concat(msgs)" :key="i">@{{ m }}</span>
+      </li>
+    </ul>
+  </div>
 
   {{-- form card --------------------------------------------------------- --}}
   <div class="row">
     <div class="col-lg-9 col-xl-8">
-      <div class="panel">
+      <div class="panel position-relative">
         <div class="panel-heading d-flex justify-content-between align-items-center">
           <h3 class="mb-0 fs-5">Integration details</h3>
-          <a href="{{ url('/wordpress_plus_laravel') }}" class="btn btn-sm btn-outline-secondary">
+          <a href="{{ route('wpl.index') }}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to list
           </a>
         </div>
 
-        <form action="/wordpress-plus-laravel"
-              id="SiteForm"
-              method="POST"
-              class="p-3 p-md-4"
-              novalidate
-              @submit="onSubmit">
+        <form
+          action="{{ route('wpl.store') }}"
+          id="SiteForm"
+          method="POST"
+          class="p-3 p-md-4"
+          novalidate
+          @submit.prevent="submit"
+        >
           @csrf
 
           {{-- Action (New or Import) --}}
@@ -133,14 +186,60 @@
             </select>
           </div>
 
-          <div class="d-flex gap-2">
-            <button type="submit" id="create_button" class="btn btn-pete" :disabled="submitting">
-              <span v-if="submitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-              <span v-text="submitting ? 'Creating…' : 'Create'"></span>
+          <div class="d-flex align-items-center gap-2">
+            <button type="submit"
+                    id="create_button"
+                    class="btn btn-pete d-inline-flex align-items-center gap-2"
+                    :disabled="submitting"
+                    :data-loading="submitting ? 1 : null">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i>
+              <span class="btn-text" v-text="submitting ? 'Creating…' : 'Create'"></span>
             </button>
-            <a href="{{ url('/wordpress_plus_laravel') }}" class="btn btn-outline-secondary">Cancel</a>
+            <a href="{{ route('wpl.index') }}" class="btn btn-outline-secondary">Cancel</a>
+
+            <span id="creating_hint"
+                  class="ms-2 text-muted small"
+                  aria-live="polite"
+                  v-show="submitting">
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Provisioning…
+            </span>
           </div>
         </form>
+
+        {{-- Provisioning steps (skeleton) -------------------------------- --}}
+        <div id="provision_skeleton" class="border-top px-3 px-md-4 py-3" v-show="submitting">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <strong class="me-1">Setting things up…</strong>
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          </div>
+
+          <div class="vstack gap-2">
+            <div class="d-flex align-items-center gap-2 step active">
+              <span class="step-dot"></span>
+              <div class="step-label">Creating Laravel app / files</div>
+            </div>
+            <div class="skel-row" style="width:55%"></div>
+
+            <div class="d-flex align-items-center gap-2 step active">
+              <span class="step-dot"></span>
+              <div class="step-label">Linking with WordPress</div>
+            </div>
+            <div class="skel-row" style="width:68%"></div>
+
+            <div class="d-flex align-items-center gap-2 step">
+              <span class="step-dot"></span>
+              <div class="step-label">Installing dependencies</div>
+            </div>
+            <div class="skel-row" style="width:62%"></div>
+
+            <div class="d-flex align-items-center gap-2 step">
+              <span class="step-dot"></span>
+              <div class="step-label">Reloading web server</div>
+            </div>
+            <div class="skel-row" style="width:48%"></div>
+          </div>
+        </div>
 
         <div class="panel-footer small text-muted">
           WordPress Pete will provision the WordPress ↔ Laravel Sync and reload the web server automatically.
@@ -174,6 +273,7 @@
         const submitting   = ref(false);
         const sites        = ref([]);
         const sitesLoading = ref(false);
+        const errors       = reactive({});
 
         // old() hydration from Blade
         const oldVals = {
@@ -247,11 +347,71 @@
           }
         }
 
-        // Keep parity with the other view: show a loader on submit
-        function onSubmit(){
+        // Async submit (matches sites/create pattern)
+        async function submit(){
+          // clear previous errors
+          for (const k of Object.keys(errors)) delete errors[k];
+
+          // basic client checks
+          if(!form.action_name){
+            errors.action_name = ['Please select an action.'];
+            return;
+          }
+          if(form.action_name === 'new_wordpress_laravel'){
+            if(!form.selected_version) errors.selected_version = ['Please select a Laravel version.'];
+          }
+          if(form.action_name === 'import_wordpress_laravel'){
+            if(!form.wordpress_laravel_git) errors.wordpress_laravel_git = ['Repository URL is required.'];
+            if(!gitUrlOk.value) errors.wordpress_laravel_git = ['Use an https:// or git@ URL.'];
+            if(!form.wordpress_laravel_git_branch) errors.wordpress_laravel_git_branch = ['Branch is required.'];
+          }
+          if(!form.integration_type) errors.integration_type = ['Please select a sync type.'];
+          if(!form.wordpress_laravel_name) errors.wordpress_laravel_name = ['Please enter an app name.'];
+          if(!form.wordpress_laravel_target) errors.wordpress_laravel_target = ['Please select a target WordPress site.'];
+
+          if(Object.keys(errors).length){ return; }
+
           submitting.value = true;
-          if (typeof activate_loader === 'function') activate_loader();
-          // Let the form POST normally; browser will follow redirect to logs
+          try{
+            const token = document.querySelector('#SiteForm input[name=_token]')?.value || '';
+            const res = await fetch(@json(route('wpl.store')), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': token
+              },
+              body: JSON.stringify({ ...form })
+            });
+
+            if (res.status === 422){
+              const data = await res.json().catch(()=>({}));
+              Object.assign(errors, data.errors || { form: [data.message || 'Validation failed.'] });
+              submitting.value = false;
+              return;
+            }
+
+            if (!res.ok){
+              // Non-2xx (e.g., 400 for prod-only SSL, etc)
+              let msg = 'Failed to create integration. Please try again.';
+              try{
+                const data = await res.json();
+                if (data && data.message) msg = data.message;
+              }catch(_){}
+              window.toast && window.toast(msg, 'error');
+              submitting.value = false;
+              return;
+            }
+
+            // Success — controller redirects to logs, but fetch won’t follow.
+            // Send user to the list (from there they can open logs).
+            window.location.assign(@json(route('wpl.index')));
+          }catch(err){
+            console.error(err);
+            window.toast && window.toast('Unexpected error. Please try again.', 'error');
+            submitting.value = false;
+          }
         }
 
         // React when user picks an action to reveal common fields & load sites
@@ -266,11 +426,10 @@
           if(form.action_name){ loadWordPressSites(); }
           updateHints();
 
-          // Reset UI if page is restored from bfcache (like in sites/create)
+          // Reset UI if page is restored from bfcache
           window.addEventListener('pageshow', function (evt) {
             if (evt.persisted) {
               submitting.value = false;
-              if (typeof deactivate_loader === 'function') deactivate_loader();
             }
           });
         });
@@ -280,14 +439,15 @@
           submitting,
           sites,
           sitesLoading,
-          showCommon,
+          errors,
+          showCommon: computed(()=> showCommon.value),
           showVersion,
           showImport,
           gitUrlClass,
           integrationHelp,
           appNameHint,
           updateHints,
-          onSubmit,
+          submit,
         };
       }
     }).mount('#wp-laravel-create');

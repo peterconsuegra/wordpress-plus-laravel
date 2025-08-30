@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid" id="wplApp" v-cloak>
 
     {{-- flash / updater placeholder --}}
     <div id="update_area_info"></div>
@@ -12,7 +12,7 @@
             <img src="/pete.png" alt="WordPress Pete" class="img-fluid" style="max-height:200px">
         </div>
         <div class="col-md-6 d-flex flex-column justify-content-center">
-            <a href="{{ url('/wordpress-plus-laravel/create') }}" class="btn btn-pete btn-lg w-100">
+            <a href="{{ route('wpl.create') }}" class="btn btn-pete btn-lg w-100">
                 <i class="bi bi-plus-lg me-1"></i>Create WordPress ↔ Laravel Sync
             </a>
             <p class="text-muted mb-0 mt-2">
@@ -37,107 +37,144 @@
         </div>
     @endif
 
+    {{-- Loading overlay + skeleton styles -------------------------------- --}}
+    <style>
+      [v-cloak]{ display:none; }
+      .table-loading-overlay{
+        position:absolute; inset:0;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.95));
+        z-index: 2; border-radius:.5rem;
+      }
+      .skel-row{
+        height: 18px; border-radius: 6px;
+        background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
+        background-size: 400% 100%; animation: skel 1.2s ease-in-out infinite;
+      }
+      @keyframes skel{ 0%{background-position:100% 0} 100%{background-position:0 0} }
+    </style>
+
     {{-- integrations table ------------------------------------------------ --}}
     <div class="row">
         <div class="col-12">
-            <div class="panel">
+            <div class="panel position-relative">
                 <div class="panel-heading d-flex justify-content-between align-items-center">
                     <h3 class="mb-0 fs-5">My WordPress ↔ Laravel Syncs</h3>
+                    <small id="wplTotalCount" class="text-muted" v-if="total">@{{ total }} total</small>
+                </div>
 
-                    @if(isset($sites) && method_exists($sites,'total'))
-                        <small class="text-muted">{{ $sites->total() }} total</small>
-                    @elseif(isset($sites) && is_countable($sites))
-                        <small class="text-muted">{{ count($sites) }} total</small>
-                    @endif
+                <!-- Loading overlay -->
+                <div v-if="loadingRows" class="table-loading-overlay text-center">
+                  <div class="spinner-border mb-3" role="status" aria-hidden="true"></div>
+                  <div class="text-muted">Loading integrations…</div>
                 </div>
 
                 <div class="table-responsive">
                     @php
-                        $hasItems = isset($sites) && (
-                            (method_exists($sites,'count') && $sites->count()) ||
-                            (is_countable($sites) && count($sites))
-                        );
+                        // Server payload fallback for first render / errors
+                        $fallback = isset($sites) ? $sites->map(fn($s)=>[
+                            'id'   => (int)$s->id,
+                            'name' => (string)($s->name ?? $s->url ?? ''),
+                            'url'  => (string)($s->url ?? ''),
+                            'ssl'  => (bool)$s->ssl,
+                            'integration_type' => (string)($s->integration_type ?? '')
+                        ])->values()->all() : [];
                     @endphp
 
-                    @if($hasItems)
-                        <table class="table table-hover table-striped align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="60">ID</th>
-                                    <th>Project Name</th>
-                                    <th>URL</th>
-                                    <th class="text-center" width="70">SSL</th>
-                                    <th class="text-end" width="320">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($sites as $site)
-                                    <tr>
-                                        <td class="text-muted">{{ $site->id }}</td>
-                                        <td class="fw-semibold">{{ $site->name }}</td>
-                                        <td>
-                                            <a href="http://{{ $site->url }}" target="_blank" rel="noopener">
-                                                {{ $site->url }}
-                                            </a>
-                                        </td>
-                                        <td>
-                                           @if($site->ssl)
-                                                <i class="bi bi-shield-check text-success" title="SSL enabled"></i>
-                                            @else
-                                                <i class="bi bi-shield-x text-danger" title="SSL disabled"></i>
-                                            @endif
-                                        </td>
-                                        <td class="text-end">
-                                            <div class="btn-group btn-group-sm" role="group">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Project Name</th>
+                                <th>URL</th>
+                                <th class="text-center" width="70">SSL</th>
+                                <th class="text-end" width="420">Actions</th>
+                            </tr>
+                        </thead>
 
-                                                {{-- SSL (only for separate sub-domain) --}}
-                                                @if($site->integration_type !== 'inside_wordpress')
-                                                    <button type="button"
-                                                            class="btn btn-outline-secondary generate_ssl_action"
-                                                            data-site-id="{{ $site->id }}"
-                                                            title="Generate SSL">
-                                                        <i class="bi bi-lock"></i> SSL
-                                                    </button>
-                                                @endif
+                        <!-- Skeleton rows while loading -->
+                        <tbody v-if="loadingRows">
+                          <tr v-for="n in 6" :key="'skel-'+n">
+                            <td><div class="skel-row" style="width:40px"></div></td>
+                            <td><div class="skel-row" style="width:60%"></div></td>
+                            <td><div class="skel-row" style="width:75%"></div></td>
+                            <td class="text-center"><div class="skel-row mx-auto" style="width:24px"></div></td>
+                            <td class="text-end">
+                              <div class="d-inline-block" style="width:300px; max-width:100%">
+                                <div class="skel-row" style="width:100%"></div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
 
-                                                {{-- Logs --}}
-                                                <a href="/wordpress_plus_laravel/logs/{{ $site->id }}"
-                                                   class="btn btn-info"
-                                                   title="View logs">
-                                                    <i class="bi bi-journal-text"></i> Sync Details
-                                                </a>
+                        <!-- Real rows once loaded -->
+                        <tbody v-else-if="rows.length">
+                            <tr v-for="site in rows" :key="site.id">
+                                <td class="text-muted">@{{ site.id }}</td>
+                                <td class="fw-semibold">@{{ site.name }}</td>
+                                <td>
+                                    <a :href="`http://${site.url}`" target="_blank" rel="noopener">
+                                        @{{ site.url }}
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <i v-if="site.ssl" class="bi bi-shield-check text-success" title="SSL enabled"></i>
+                                    <i v-else class="bi bi-shield-x text-danger" title="SSL disabled"></i>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group">
 
-                                                {{-- Delete --}}
-                                                <form action="/wordpress_plus_laravel/delete"
-                                                      method="POST"
-                                                      class="d-inline-block"
-                                                      onsubmit="return confirm('Delete this integration? This action cannot be undone.');">
-                                                    @csrf
-                                                    <input type="hidden" name="site_id" value="{{ $site->id }}">
-                                                    <button type="submit" class="btn btn-danger" title="Delete integration">
-                                                        <i class="bi bi-trash"></i> Delete
-                                                    </button>
-                                                </form>
+                                        <!-- SSL (hide for inside_wordpress when we know the type) -->
+                                        <button
+                                            v-if="site.integration_type !== 'inside_wordpress'"
+                                            class="btn btn-outline-secondary"
+                                            :disabled="isBusy(site.id)"
+                                            @click="generateSSL(site.id)"
+                                            title="Generate SSL">
+                                            <i class="bi bi-lock"></i>
+                                            <span v-if="isBusy(site.id)" class="ms-1">Generating…</span>
+                                            <span v-else class="ms-1">generate SSL</span>
+                                        </button>
 
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        <!-- Logs -->
+                                        <a :href="`${logsBase}/${site.id}`"
+                                           class="btn btn-info"
+                                           title="View logs">
+                                            <i class="bi bi-journal-text"></i> sync logs
+                                        </a>
 
-                        <div class="panel-footer">
-                            <div class="d-flex justify-content-center">
-                                @if(method_exists($sites,'links'))
-                                    {{ $sites->links() }}
-                                @endif
-                            </div>
+                                        <!-- Delete -->
+                                        <button type="button"
+                                                class="btn btn-danger"
+                                                :disabled="deletingId === site.id"
+                                                @click="confirmDelete(site)">
+                                            <span v-if="deletingId === site.id" class="spinner-border spinner-border-sm me-1"></span>
+                                            <i v-else class="bi bi-trash me-1"></i>
+                                            delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                        <!-- Empty state -->
+                        <tbody v-else>
+                            <tr>
+                              <td colspan="5" class="text-center p-5">
+                                <p class="lead mb-0">No integrations yet — click “Create WordPress ↔ Laravel Sync” to get started.</p>
+                              </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="panel-footer">
+                        <div class="d-flex justify-content-center mt-3">
+                            @if(isset($sites) && method_exists($sites,'links'))
+                                {{ $sites->links() }}
+                            @endif
                         </div>
-                    @else
-                        <div class="p-5 text-center">
-                            <p class="lead mb-0">No integrations yet — click “Create WordPress + Laravel Instance” to get started.</p>
-                        </div>
-                    @endif
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -146,42 +183,191 @@
 </div>
 @endsection
 
+
 @push('scripts')
 <script>
-(function ($) {
-    'use strict';
+const { createApp, nextTick } = Vue;
 
-    // Always send the token with Ajax
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+createApp({
+  data() {
+    return {
+      // table state
+      loadingRows: true,
+      busyIds: new Set(),
+      rows: [],
+      total: 0,
+      deletingId: null,
 
-    // Loader helpers (match sites/index)
-    const loader = {
-        show(){ new bootstrap.Modal('#loadMe', {backdrop:'static', keyboard:false}).show(); },
-        hide(){ const m = bootstrap.Modal.getInstance(document.getElementById('loadMe')); if(m) m.hide(); }
+      // routes
+      fetchUrl: @json(route('wpl.index', [], false)), // reuse Sites JSON with filter
+      generateSslUrl: @json(route('wpl.generate-ssl', [], false)),
+      deleteUrl: @json(route('wpl.delete', [], false)),
+      logsBase: @json(rtrim(route('wpl.logs', 0), '/0')),
+      // server fallback
+      serverFallback: @json($fallback ?? []),
     };
+  },
 
-    // SSL generation (reuses app's /generate_ssl endpoint)
-    $(document).on('click', '.generate_ssl_action', function () {
-        if (!confirm('Generate a new SSL certificate? This may replace the current certificate.')) return;
+  async mounted() {
+    await nextTick();
+    this.loadRows();
+  },
 
-        loader.show();
-        $.post('/generate_ssl', { site_id: $(this).data('site-id') })
-            .done(res => {
-                loader.hide();
-                if (res && res.message) {
-                    alert(res.message);
-                } else {
-                    location.reload();
-                }
-            })
-            .fail(() => {
-                loader.hide();
-                alert('SSL generation failed.');
-            });
-    });
+  methods: {
+    /* ------------ data loading ------------ */
+    async loadRows() {
+      this.loadingRows = true;
+      try {
+        const res = await fetch(this.fetchUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ app_name: 'WordPress+Laravel' })
+        });
 
-})(jQuery);
+        if (!res.ok) throw new Error('Failed to load rows');
+        const list = await res.json();
+
+        const normalized = (list || []).map(s => ({
+          id: Number(s.id),
+          name: String(s.name ?? s.url ?? ''),
+          url: String(s.url ?? ''),
+          ssl: Boolean(s.ssl ?? false),
+          integration_type: String(s.integration_type ?? ''),
+        }));
+
+        this.rows = normalized;
+        this.total = normalized.length;
+        this.updateTotalBadge();
+      } catch (e) {
+        // Fallback to server-rendered payload
+        this.rows  = (this.serverFallback || []).map(s => ({
+          id: Number(s.id),
+          name: String(s.name ?? ''),
+          url: String(s.url ?? ''),
+          ssl: Boolean(s.ssl ?? false),
+          integration_type: String(s.integration_type ?? ''),
+        }));
+        this.total = this.rows.length;
+        this.updateTotalBadge();
+      } finally {
+        this.loadingRows = false;
+      }
+    },
+
+    async refreshRows() {
+      try {
+        const res = await fetch(this.fetchUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ app_name: 'WordPress+Laravel' })
+        });
+        if (!res.ok) return;
+        const list = await res.json();
+        const normalized = (list || []).map(s => ({
+          id: Number(s.id),
+          name: String(s.name ?? s.url ?? ''),
+          url: String(s.url ?? ''),
+          ssl: Boolean(s.ssl ?? false),
+          integration_type: String(s.integration_type ?? ''),
+        }));
+        this.rows = normalized;
+        this.total = normalized.length;
+        this.updateTotalBadge();
+      } catch {}
+    },
+
+    updateTotalBadge() {
+      const totalEl = document.getElementById('wplTotalCount');
+      if (totalEl) totalEl.textContent = `${this.total} total`;
+    },
+
+    isBusy(id) {
+      return this.busyIds.has(Number(id));
+    },
+
+    /* ------------ SSL ------------ */
+    async generateSSL(id) {
+      if (!id) return;
+      if (!confirm('Generate a new SSL certificate for this integration?')) return;
+
+      this.busyIds.add(Number(id));
+      try {
+        const res = await fetch(this.generateSslUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ site_id: id })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.error) {
+          window.toast?.(data.message || 'SSL generation failed.', 'error');
+          return;
+        }
+
+        window.toast?.('SSL generation started.', 'success');
+        this.refreshRows();
+      } catch {
+        window.toast?.('Network error. Please try again.', 'error');
+      } finally {
+        this.busyIds.delete(Number(id));
+      }
+    },
+
+    /* ------------ DELETE ------------ */
+    async confirmDelete(site) {
+      if (!confirm(`Delete "${site.name}"? This action cannot be undone.`)) return;
+
+      this.deletingId = site.id;
+      try {
+        const res = await fetch(this.deleteUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ site_id: site.id })
+        });
+
+        if (!res.ok) throw new Error('Delete failed');
+
+        // Optimistic removal
+        this.rows = this.rows.filter(s => s.id !== site.id);
+        this.total = Math.max(0, this.total - 1);
+        this.updateTotalBadge();
+
+        window.toast?.('Integration deleted successfully.', 'success');
+
+        // Keep consistent with server
+        this.refreshRows();
+      } catch (e) {
+        window.toast?.('Delete failed. Please try again.', 'error');
+      } finally {
+        this.deletingId = null;
+      }
+    },
+  }
+}).mount('#wplApp');
 </script>
 @endpush
