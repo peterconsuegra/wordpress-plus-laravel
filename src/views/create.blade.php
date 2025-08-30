@@ -40,7 +40,7 @@
           </a>
         </div>
 
-        <form action="/wordpress_plus_laravel/store"
+        <form action="/wordpress-plus-laravel"
               id="SiteForm"
               method="POST"
               class="p-3 p-md-4"

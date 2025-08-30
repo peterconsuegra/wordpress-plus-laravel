@@ -12,7 +12,7 @@
             <img src="/pete.png" alt="WordPress Pete" class="img-fluid" style="max-height:200px">
         </div>
         <div class="col-md-6 d-flex flex-column justify-content-center">
-            <a href="{{ url('/wordpress_plus_laravel/create') }}" class="btn btn-pete btn-lg w-100">
+            <a href="{{ url('/wordpress-plus-laravel/create') }}" class="btn btn-pete btn-lg w-100">
                 <i class="bi bi-plus-lg me-1"></i>Create WordPress ↔ Laravel Sync
             </a>
             <p class="text-muted mb-0 mt-2">
