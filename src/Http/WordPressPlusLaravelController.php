@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Pete\WordPressPlusLaravel\Models\Site;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Controller for WordPress ↔ Laravel integrations (WordPress Plus Laravel).
@@ -65,7 +66,7 @@ class WordPressPlusLaravelController extends Controller
     /**
      * List WordPress ↔ Laravel integrations.
      */
-    public function index(Request $request): View
+    /*public function index(Request $request): View
     {
         $viewsw      = '/wordpress-plus-laravel';
         $currentUser = Auth::user();
@@ -84,7 +85,31 @@ class WordPressPlusLaravelController extends Controller
         }
 
         return view('wordpress-plus-laravel-plugin::index', compact('sites', 'currentUser', 'viewsw'));
-    }
+    }*/
+
+    public function index(Request $request): View
+	{
+		$currentUser = Auth::user();
+		$viewsw      = '/wordpress-plus-laravel';
+
+		// Base query
+		$query = Site::query()
+			->where('app_name', 'WordPress+Laravel')
+			->orderByDesc('id');
+
+		// Only admins can see all sites
+		if (! Gate::allows('user.admin')) {
+			$query->where('user_id', $currentUser->id);
+		}
+
+		// Per-page from request with sane bounds (1..50). Default: 10
+		$perPage = (int) $request->integer('per_page', 10);
+		$perPage = max(1, min($perPage, 50));
+
+		$sites = $query->paginate($perPage)->withQueryString();
+
+        return view('wordpress-plus-laravel-plugin::index', compact('sites', 'currentUser', 'viewsw'));
+	}
 
     /**
      * Create/import a new integration.
