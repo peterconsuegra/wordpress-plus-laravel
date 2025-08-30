@@ -63,30 +63,6 @@ class WordPressPlusLaravelController extends Controller
         return view('wordpress-plus-laravel-plugin::create', compact('currentUser', 'viewsw'));
     }
 
-    /**
-     * List WordPress ↔ Laravel integrations.
-     */
-    /*public function index(Request $request): View
-    {
-        $viewsw      = '/wordpress-plus-laravel';
-        $currentUser = Auth::user();
-
-        if ($currentUser->admin ?? false) {
-            $sites = Site::query()
-                ->where('app_name', 'WordPress+Laravel')
-                ->orderByDesc('id')
-                ->paginate(self::PER_PAGE_ADMIN);
-        } else {
-            // Assuming the User model has my_sites() relationship:
-            $sites = $currentUser->my_sites()
-                ->where('app_name', 'WordPress+Laravel')
-                ->orderByDesc('id')
-                ->paginate(self::PER_PAGE_USER);
-        }
-
-        return view('wordpress-plus-laravel-plugin::index', compact('sites', 'currentUser', 'viewsw'));
-    }*/
-
     public function index(Request $request): View
 	{
 		$currentUser = Auth::user();
@@ -226,6 +202,11 @@ class WordPressPlusLaravelController extends Controller
         /** @var Site $site */
         $site = Site::findOrFail($id);
 
+        // Site ownership: only site authors (user_id) OR admins
+		if (! \Gate::allows('sites.manage', $site)) {
+			abort(403, 'You are not authorized to manage this site.');
+		}
+
         /** @var Site $targetSite */
         $targetSite = Site::findOrFail((int) $site->wordpress_laravel_target_id);
 
@@ -269,18 +250,12 @@ class WordPressPlusLaravelController extends Controller
         /** @var Site $site */
         $site = Site::findOrFail((int) $request->input('site_id'));
 
-        if (method_exists($user, 'is_owner_or_admin') && $user->is_owner_or_admin($site)) {
-            Log::info('Deleting WordPress+Laravel site', ['site_id' => $site->id]);
+        // Site ownership: only site authors (user_id) OR admins
+		if (! \Gate::allows('sites.manage', $site)) {
+			abort(403, 'You are not authorized to manage this site.');
+		}
 
-            $site->delete_wordpress_laravel();
-
-            if ((string) env('PETE_DEBUG') === 'active') {
-                Log::info('Output deleteDebug: ' . (string) $site->output);
-            }
-
-            $site->delete();
-        }
-
+        $site->delete();
         OServer::reload_server();
 
         return redirect()->route('wpl.index');
@@ -304,6 +279,14 @@ class WordPressPlusLaravelController extends Controller
 
         /** @var Site $site */
         $site = Site::findOrFail((int) $request->input('site_id'));
+
+        if (! \Gate::allows('sites.manage', $site)) {
+			return response()->json([
+				'error'   => true,
+				'message' => 'You are not authorized to manage this site.',
+			], 403);
+		}
+
         $site->ssl = true;
         $site->save();
 

@@ -60,7 +60,23 @@
             <div class="panel position-relative">
                 <div class="panel-heading d-flex justify-content-between align-items-center">
                     <h3 class="mb-0 fs-5">My WordPress ↔ Laravel Syncs</h3>
-                    <small id="wplTotalCount" class="text-muted" v-if="total">@{{ total }} total</small>
+
+                    <div class="d-flex align-items-center gap-2">
+                        {{-- Per-page selector (server-driven pagination) --}}
+                        <form method="GET" action="{{ route('wpl.index') }}" class="d-inline-block">
+                            <label for="per_page" class="form-label me-2 mb-0 small text-muted">Rows per page:</label>
+                            <select name="per_page" id="per_page" class="form-select form-select-sm d-inline-block w-auto"
+                                    onchange="this.form.submit()">
+                                @foreach([5,10,20,50] as $size)
+                                    <option value="{{ $size }}" {{ request('per_page', 10) == $size ? 'selected' : '' }}>
+                                        {{ $size }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+
+                        <small id="wplTotalCount" class="text-muted" v-if="total">@{{ total }} total</small>
+                    </div>
                 </div>
 
                 <!-- Loading overlay -->
@@ -71,7 +87,7 @@
 
                 <div class="table-responsive">
                     @php
-                        // Server payload fallback for first render / errors
+                        /** Server payload → Vue fallback bootstrap **/
                         $fallback = isset($sites) ? $sites->map(fn($s)=>[
                             'id'   => (int)$s->id,
                             'name' => (string)($s->name ?? $s->url ?? ''),
@@ -79,6 +95,10 @@
                             'ssl'  => (bool)$s->ssl,
                             'integration_type' => (string)($s->integration_type ?? '')
                         ])->values()->all() : [];
+
+                        $totalServer = isset($sites) && method_exists($sites,'total')
+                            ? (int) $sites->total()
+                            : (\is_array($fallback) ? \count($fallback) : 0);
                     @endphp
 
                     <table class="table table-hover table-striped align-middle mb-0">
@@ -170,7 +190,7 @@
                     <div class="panel-footer">
                         <div class="d-flex justify-content-center mt-3">
                             @if(isset($sites) && method_exists($sites,'links'))
-                                {{ $sites->links() }}
+                                {{ $sites->withQueryString()->links('pagination::bootstrap-5') }}
                             @endif
                         </div>
                     </div>
@@ -199,103 +219,39 @@ createApp({
       deletingId: null,
 
       // routes
-      fetchUrl: @json(route('wpl.index', [], false)), // reuse Sites JSON with filter
+      // We keep these to reuse your existing actions
       generateSslUrl: @json(route('wpl.generate-ssl', [], false)),
       deleteUrl: @json(route('wpl.delete', [], false)),
       logsBase: @json(rtrim(route('wpl.logs', 0), '/0')),
-      // server fallback
+
+      // server bootstrap payload (fallback → now primary)
       serverFallback: @json($fallback ?? []),
+      serverTotal: @json($totalServer ?? 0),
     };
   },
 
   async mounted() {
     await nextTick();
-    this.loadRows();
+    // Initialize from server payload immediately (no JSON endpoint required)
+    this.rows   = (this.serverFallback || []).map(s => ({
+      id: Number(s.id),
+      name: String(s.name ?? s.url ?? ''),
+      url: String(s.url ?? ''),
+      ssl: Boolean(s.ssl ?? false),
+      integration_type: String(s.integration_type ?? ''),
+    }));
+    this.total  = Number(this.serverTotal) || this.rows.length || 0;
+    this.updateTotalBadge();
+    this.loadingRows = false;
   },
 
   methods: {
-    /* ------------ data loading ------------ */
-    async loadRows() {
-      this.loadingRows = true;
-      try {
-        const res = await fetch(this.fetchUrl, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
-          body: JSON.stringify({ app_name: 'WordPress+Laravel' })
-        });
-
-        if (!res.ok) throw new Error('Failed to load rows');
-        const list = await res.json();
-
-        const normalized = (list || []).map(s => ({
-          id: Number(s.id),
-          name: String(s.name ?? s.url ?? ''),
-          url: String(s.url ?? ''),
-          ssl: Boolean(s.ssl ?? false),
-          integration_type: String(s.integration_type ?? ''),
-        }));
-
-        this.rows = normalized;
-        this.total = normalized.length;
-        this.updateTotalBadge();
-      } catch (e) {
-        // Fallback to server-rendered payload
-        this.rows  = (this.serverFallback || []).map(s => ({
-          id: Number(s.id),
-          name: String(s.name ?? ''),
-          url: String(s.url ?? ''),
-          ssl: Boolean(s.ssl ?? false),
-          integration_type: String(s.integration_type ?? ''),
-        }));
-        this.total = this.rows.length;
-        this.updateTotalBadge();
-      } finally {
-        this.loadingRows = false;
-      }
-    },
-
-    async refreshRows() {
-      try {
-        const res = await fetch(this.fetchUrl, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
-          body: JSON.stringify({ app_name: 'WordPress+Laravel' })
-        });
-        if (!res.ok) return;
-        const list = await res.json();
-        const normalized = (list || []).map(s => ({
-          id: Number(s.id),
-          name: String(s.name ?? s.url ?? ''),
-          url: String(s.url ?? ''),
-          ssl: Boolean(s.ssl ?? false),
-          integration_type: String(s.integration_type ?? ''),
-        }));
-        this.rows = normalized;
-        this.total = normalized.length;
-        this.updateTotalBadge();
-      } catch {}
-    },
-
     updateTotalBadge() {
       const totalEl = document.getElementById('wplTotalCount');
       if (totalEl) totalEl.textContent = `${this.total} total`;
     },
 
-    isBusy(id) {
-      return this.busyIds.has(Number(id));
-    },
+    isBusy(id) { return this.busyIds.has(Number(id)); },
 
     /* ------------ SSL ------------ */
     async generateSSL(id) {
@@ -324,7 +280,7 @@ createApp({
         }
 
         window.toast?.('SSL generation started.', 'success');
-        this.refreshRows();
+        // no JSON reload; the icon may change after backend finishes
       } catch {
         window.toast?.('Network error. Please try again.', 'error');
       } finally {
@@ -358,9 +314,6 @@ createApp({
         this.updateTotalBadge();
 
         window.toast?.('Integration deleted successfully.', 'success');
-
-        // Keep consistent with server
-        this.refreshRows();
       } catch (e) {
         window.toast?.('Delete failed. Please try again.', 'error');
       } finally {
